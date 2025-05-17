@@ -11,7 +11,7 @@ class MonApp extends StatelessWidget {
     return MaterialApp(
       title: 'Gestion Citerne',
       debugShowCheckedModeBanner: false,
-      initialRoute: GestionRoutes.accueil,
+      initialRoute: GestionRoutes.demarrage,
       routes: GestionRoutes.getRoutes(),
     );
   }
