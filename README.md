@@ -4,12 +4,10 @@
 Ce dossier contient la logique principale de l’application mobile GestioCiterneMobile, développée en Dart/Flutter. Il regroupe l’ensemble du code source nécessaire au fonctionnement de l’application, de la gestion des interfaces à la manipulation des données.
 
 ## Structure générale
-
+markdown 
 lib/
 │
-
 ├── main.dart    # Point d’entrée de l’application
-
 ├── gestion_routes.dart                  # Fichier centralisé pour gérer les routes nommées
 │
 ├── composants/
