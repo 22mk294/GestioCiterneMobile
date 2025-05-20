@@ -69,7 +69,7 @@ Le fichier pubspec.yaml est un élément central dans tout projet Flutter/Dart. 
 - **Scripts et configurations additionnelles**  
   D’autres sections peuvent inclure des scripts personnalisés, des configurations pour la génération de code, ou des paramètres propres à certains packages.
 
-### Exemple de structure :
+### Structure functionnel du fiechier pubspec.yaml:
 
 ```yaml
 name: water
