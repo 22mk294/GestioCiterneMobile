@@ -49,8 +49,6 @@ _Remarque : adapte cette liste selon la structure réelle de ton dossier `lib/`.
 - **Swift** – 3,5% (principalement pour l’intégration native iOS si besoin)
 - **Autres** – 0,8%
 
-Tu veux une description ou une documentation à mettre dans un README concernant le fichier pubspec.yaml du dépôt 22mk294/GestioCiterneMobile. Voici un exemple de section à inclure dans ton README :
-
 ---
 
 ## pubspec.yaml
