@@ -4,7 +4,7 @@
 Ce dossier contient la logique principale de l’application mobile GestioCiterneMobile, développée en Dart/Flutter. Il regroupe l’ensemble du code source nécessaire au fonctionnement de l’application, de la gestion des interfaces à la manipulation des données.
 
 ## Structure générale
-
+```
 lib/
 │
 ├── main.dart    # Point d’entrée de l’application
@@ -32,7 +32,7 @@ lib/
 │
 └── utils/
     └── constantes.dart                  # Constantes générales, couleurs, styles
-
+```
 
 - **main.dart** : Point d’entrée de l’application. Configure et lance l’application Flutter.
 - **models/** : Définitions des modèles de données utilisés dans l’application (ex : citernes, utilisateurs, historiques…).
