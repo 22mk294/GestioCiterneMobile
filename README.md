@@ -1,6 +1,3 @@
-Voici un exemple de README adapté pour le dossier lib de ton projet Dart (Flutter) GestioCiterneMobile :
-
----
 
 # Dossier `lib/` – GestioCiterneMobile
 
