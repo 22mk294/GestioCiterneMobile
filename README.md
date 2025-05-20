@@ -49,12 +49,6 @@ _Remarque : adapte cette liste selon la structure réelle de ton dossier `lib/`.
 - **Swift** – 3,5% (principalement pour l’intégration native iOS si besoin)
 - **Autres** – 0,8%
 
-## Bonnes pratiques
-
-- Organiser le code par fonctionnalités ou domaines (feature-based).
-- Séparer clairement les responsabilités : présentation (UI), logique métier, accès aux données.
-- Utiliser des widgets personnalisés pour réutiliser l’UI.
-- Documenter chaque classe/fonction complexe.
 
 ## Exemple d’utilisation
 
