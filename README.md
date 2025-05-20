@@ -5,6 +5,35 @@ Ce dossier contient la logique principale de l’application mobile GestioCitern
 
 ## Structure générale
 
+lib/
+│
+├── main.dart                            # Point d’entrée de l’application
+├── gestion_routes.dart                  # Fichier centralisé pour gérer les routes nommées
+│
+├── composants/
+│   └── barre_navigation_inferieure.dart # Composant personnalisé pour la barre de navigation
+│
+├── vues/
+│   ├── ecrans/
+│   │   ├── ecran_accueil.dart           # Interface Accueil (niveau d’eau)
+│   │   ├── ecran_parametres.dart        # Interface Paramètres
+│   │   ├── ecran_historique.dart        # Interface Historique
+│   │   ├── ecran_alertes.dart           # Interface Alertes
+│   │   └── ecran_demarrage.dart         # Interface SplashScreen (affichée pendant 3s)
+│   │
+│   └── widgets/
+│       └── (widgets réutilisables si besoin)
+│
+├── modèles/
+│   └── (modèles de données, ex : Consommation, Alerte...)
+│
+├── services/
+│   └── service_esp32_http.dart          # Service de communication HTTP avec l'ESP32
+│
+└── utils/
+    └── constantes.dart                  # Constantes générales, couleurs, styles
+
+
 - **main.dart** : Point d’entrée de l’application. Configure et lance l’application Flutter.
 - **models/** : Définitions des modèles de données utilisés dans l’application (ex : citernes, utilisateurs, historiques…).
 - **services/** : Services de gestion de données, d’accès à des API, ou de persistance locale.
@@ -42,5 +71,3 @@ Pour ajouter une nouvelle fonctionnalité, crée un nouveau fichier dans le doss
 Merci de respecter la structure existante pour toute contribution ou modification. Pense à documenter tes ajouts et à maintenir la cohérence du code.
 
 ---
-
-N’hésite pas à préciser si tu veux des exemples de code, des instructions d’installation, ou si tu veux détailler certains dossiers/fichiers spécifiques !
