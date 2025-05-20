@@ -185,17 +185,15 @@ flutter:
 
 ---
 
-Si tu veux une documentation plus spécifique ou détaillée selon le contenu exact de ton fichier pubspec.yaml, fais-le moi savoir !
-
 ## Exemple d’utilisation
 
 Pour lancer l’application depuis la racine du projet :
 
+tapez cette commande dans la console 
+
 ```bash
 flutter run
 ```
-
-Pour ajouter une nouvelle fonctionnalité, crée un nouveau fichier dans le dossier approprié (`screens/`, `models/`, etc.), puis importe-le dans `main.dart` ou l’endroit nécessaire.
 
 ## Contribution
 
