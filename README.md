@@ -7,8 +7,9 @@ Ce dossier contient la logique principale de l’application mobile GestioCitern
 
 lib/
 │
-├── main.dart    
-# Point d’entrée de l’application
+
+├── main.dart    # Point d’entrée de l’application
+
 ├── gestion_routes.dart                  # Fichier centralisé pour gérer les routes nommées
 │
 ├── composants/
