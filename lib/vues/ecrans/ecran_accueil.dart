@@ -22,13 +22,13 @@ class EcranAccueil extends StatelessWidget {
               height: 220,
               width: 220,
               child: CustomPaint(
-                painter: CercleEauPainter(pourcentage: 0.75),
+                painter: CercleEauPainter(pourcentage: 0.0),
                 child: Center(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: const [
                       Text(
-                        '75%',
+                        '0%',
                         style: TextStyle(
                           fontSize: 32,
                           fontWeight: FontWeight.bold,
@@ -46,6 +46,35 @@ class EcranAccueil extends StatelessWidget {
                     ],
                   ),
                 ),
+              ),
+            ),
+
+
+            const SizedBox(height: 20),
+            // Bouton principal
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () {},
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 15),
+                  backgroundColor: Colors.blue,
+                ),
+                child: const Text("Arrêter",
+                style: const TextStyle(color: Colors.white),
+                ),
+              ),
+            ),
+            const SizedBox(height: 18),
+            // Bouton secondaire
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton(
+                onPressed: () {},
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 15),
+                ),
+                child: const Text("Réactiver les robinets"),
               ),
             ),
             const SizedBox(height: 30),
@@ -71,7 +100,20 @@ class EcranAccueil extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 25),
+            const SizedBox(height: 10),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: const [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Robinet', style: TextStyle(fontWeight: FontWeight.bold)),
+                  ],
+                ),
+
+              ],
+            ),
+            const SizedBox(height: 20),
             // Données
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -79,7 +121,7 @@ class EcranAccueil extends StatelessWidget {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('CONSOMMATION JOURNALIÈRE', style: TextStyle(color: Colors.grey)),
+                    Text('CONSOMMATION', style: TextStyle(color: Colors.grey)),
                     SizedBox(height: 4),
                     Text('220 L', style: TextStyle(fontWeight: FontWeight.bold)),
                   ],
@@ -94,35 +136,9 @@ class EcranAccueil extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 20),
-            // Bouton principal
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {},
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 15),
-                  backgroundColor: Colors.blue,
-                ),
-                child: const Text("Arrêter",
-                style: const TextStyle(color: Colors.white),
-                ),
-              ),
-            ),
-            const SizedBox(height: 12),
-            // Bouton secondaire
-            SizedBox(
-              width: double.infinity,
-              child: OutlinedButton(
-                onPressed: () {},
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 15),
-                ),
-                child: const Text("Réactiver les robinets"),
-              ),
-            ),
 
           ],
+
         ),
       ),
       bottomNavigationBar: BarreNavigationInferieure(
