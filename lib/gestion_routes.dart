@@ -6,6 +6,7 @@ import 'vues/ecrans/ecran_parametres.dart';
 import 'vues/ecrans/ecran_historique.dart';
 import 'vues/ecrans/ecran_alertes.dart';
 import 'vues/ecrans/ecran_demarrage.dart';
+import 'vues/ecrans/ecran_erreur_connexion.dart';
 
 // Classe qui gère les routes de navigation de l'application
 class GestionRoutes {
@@ -15,16 +16,22 @@ class GestionRoutes {
   static const String parametres = '/parametres';
   static const String historique = '/historique';
   static const String alertes = '/alertes';
+  static const String erreurConnexion = '/erreur_connexion';
 
   // Méthode statique qui retourne une map des routes de l'application
   // Chaque route est associée à une fonction qui construit l'écran correspondant
   static Map<String, WidgetBuilder> getRoutes() {
     return {
-      demarrage: (context) => EcranDemarrage(),      // Route d'accueil (écran de démarrage)
-      accueil: (context) => EcranAccueil(),          // Route de l'écran d'accueil
-      parametres: (context) => EcranParametres(),    // Route de l'écran des paramètres
-      historique: (context) => EcranHistorique(),    // Route de l'écran de l'historique
-      alertes: (context) => EcranAlertes(),          // Route de l'écran des alertes
+
+      demarrage: (context) => EcranDemarrage(),
+      accueil: (context) => EcranAccueil(),
+      erreurConnexion: (_) => EcranErreurConnexion(),
+      parametres: (context) => EcranParametres(),
+      historique: (context) => EcranHistorique(),
+      alertes: (context) => EcranAlertes(),
+
+              // Route de l'écran des alertes
+
     };
   }
 }
