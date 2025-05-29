@@ -40,9 +40,9 @@ class BarreNavigationInferieure extends StatelessWidget {
       currentIndex: indexActif,
       onTap: (index) => _naviguer(index, context),
       type: BottomNavigationBarType.fixed,
-      backgroundColor: Colors.white,
-      selectedItemColor: Colors.indigo[900],
-      unselectedItemColor: Colors.grey[500],
+      backgroundColor: Color(0XFFECEBF9),
+      selectedItemColor: Colors.indigo,
+      unselectedItemColor: Colors.black54,
       elevation: 10,
       items: const [
         BottomNavigationBarItem(

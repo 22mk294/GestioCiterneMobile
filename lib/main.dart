@@ -1,11 +1,23 @@
 import 'package:flutter/material.dart';
-import 'gestion_routes.dart';
+import 'package:provider/provider.dart';
+import 'controleurs/controleur_accueil.dart';
+import 'gestion_routes.dart'; // Ton fichier de routes
 
 void main() {
-  runApp(MonApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider<ControleurAccueil>(
+          create: (_) => ControleurAccueil(),
+        ),
+        // Tu peux ajouter d’autres providers ici
+      ],
+      child: MyApp(),
+    ),
+  );
 }
 
-class MonApp extends StatelessWidget {
+class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
