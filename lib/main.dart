@@ -1,13 +1,29 @@
 // Importation du package Flutter pour l'interface utilisateur.
 import 'package:flutter/material.dart';
+
+import 'package:provider/provider.dart';
+import 'controleurs/controleur_accueil.dart';
+import 'gestion_routes.dart'; // Ton fichier de routes
 // Importation du fichier de gestion des routes personnalisé.
 import 'gestion_routes.dart';
 
+
 // Point d'entrée de l'application.
 void main() {
-  // Lance l'application en appelant le widget principal MonApp.
-  runApp(MonApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider<ControleurAccueil>(
+          create: (_) => ControleurAccueil(),
+        ),
+        // Tu peux ajouter d’autres providers ici
+      ],
+      child: MyApp(),
+    ),
+  );
 }
+
+
 
 // Définition du widget principal de l'application.
 class MonApp extends StatelessWidget {

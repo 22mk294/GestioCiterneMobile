@@ -1,4 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- ✅ Permission ici -->
+    <uses-permission android:name="android.permission.INTERNET"/>
     <application
         android:label="water"
         android:name="${applicationName}"
