@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../composants/barre_navigation_inferieure.dart';
 import '../../controleurs/controleur_accueil.dart';
+import '../../services/service_connectivite.dart';
+import '../../gestion_routes.dart';
 import 'dart:math';
 
 class EcranAccueil extends StatefulWidget {
@@ -15,7 +17,14 @@ class _EcranAccueilState extends State<EcranAccueil> {
   @override
   void initState() {
     super.initState();
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      final connectivite = Provider.of<ServiceConnectivite>(context, listen: false);
+      if (!connectivite.estConnecte) {
+        Navigator.pushReplacementNamed(context, GestionRoutes.erreurConnexion);
+        return;
+      }
+
       final controleur = Provider.of<ControleurAccueil>(context, listen: false);
       controleur.chargerDonnees();
     });
@@ -23,118 +32,129 @@ class _EcranAccueilState extends State<EcranAccueil> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<ControleurAccueil>(
-      builder: (context, controleur, child) {
-        final donnees = controleur.donnees;
+    return Consumer<ServiceConnectivite>(
+      builder: (context, connectivite, child) {
+        if (!connectivite.estConnecte) {
+          // Si la connexion est perdue, redirige immédiatement
+          Future.microtask(() =>
+              Navigator.pushReplacementNamed(context, GestionRoutes.erreurConnexion));
+          return const SizedBox.shrink(); // Évite un build inutile
+        }
 
-        return Scaffold(
-          appBar: AppBar(
-            title: const Text(
-              "Accueil",
-              style: TextStyle(color: Colors.black),
-            ),
-            backgroundColor: Color(0XFFECEBF9),
-            centerTitle: true,
-            elevation: 0,
-          ),
-          body: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10),
-            child: Column(
-              children: [
-                const SizedBox(height: 18),
+        return Consumer<ControleurAccueil>(
+          builder: (context, controleur, child) {
+            final donnees = controleur.donnees;
 
-                /// Cercle de niveau d'eau
-                SizedBox(
-                  height: 220,
-                  width: 220,
-                  child: CustomPaint(
-                    painter: CercleEauPainter(
-                      pourcentage: donnees?.pourcentageEau ?? 0.0,
-                    ),
-                    child: Center(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            '${((donnees?.pourcentageEau ?? 0.0) * 100).toStringAsFixed(1)}%',
-                            style: const TextStyle(
-                              fontSize: 32,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.green,
-                            ),
+            return Scaffold(
+              appBar: AppBar(
+                title: const Text(
+                  "Accueil",
+                  style: TextStyle(color: Colors.black),
+                ),
+                backgroundColor: const Color(0XFFECEBF9),
+                centerTitle: true,
+                elevation: 0,
+              ),
+              body: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10),
+                child: Column(
+                  children: [
+                    const SizedBox(height: 18),
+
+                    /// Cercle de niveau d'eau
+                    SizedBox(
+                      height: 220,
+                      width: 220,
+                      child: CustomPaint(
+                        painter: CercleEauPainter(
+                          pourcentage: donnees?.pourcentageEau ?? 0.0,
+                        ),
+                        child: Center(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                '${((donnees?.pourcentageEau ?? 0.0) * 100).toStringAsFixed(1)}%',
+                                style: const TextStyle(
+                                  fontSize: 32,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.green,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                '${(donnees?.niveauEau ?? 0.0).toStringAsFixed(1)} L / ${(donnees?.capacite ?? 1.0).toStringAsFixed(1)} L',
+                                style: const TextStyle(fontSize: 12, color: Colors.grey),
+                              ),
+                              const SizedBox(height: 4),
+                              const Text(
+                                'NIVEAU ACTUEL',
+                                style: TextStyle(fontSize: 13, color: Colors.grey),
+                              ),
+                            ],
                           ),
-                          const SizedBox(height: 4),
-                          Text(
-                            '${(donnees?.niveauEau ?? 0.0).toStringAsFixed(1)} L / ${(donnees?.capacite ?? 1.0).toStringAsFixed(1)} L',
-                            style: const TextStyle(fontSize: 12, color: Colors.grey),
-                          ),
-                          const SizedBox(height: 4),
-                          const Text(
-                            'NIVEAU ACTUEL',
-                            style: TextStyle(fontSize: 13, color: Colors.grey),
-                          ),
-                        ],
+                        ),
                       ),
                     ),
-                  ),
-                ),
-                const SizedBox(height: 18),
+                    const SizedBox(height: 18),
 
-                /// Bouton "Arrêter"
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: donnees == null ? null : () => controleur.arreterPompe(),
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 10),
-                      backgroundColor: Colors.indigo,
+                    /// Bouton "Arrêter"
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: donnees == null ? null : () => controleur.arreterPompe(),
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 10),
+                          backgroundColor: Colors.indigo,
+                        ),
+                        child: const Text("Arrêter", style: TextStyle(color: Colors.white)),
+                      ),
                     ),
-                    child: const Text("Arrêter", style: TextStyle(color: Colors.white)),
-                  ),
-                ),
-                const SizedBox(height: 18),
+                    const SizedBox(height: 18),
 
-                /// Bouton "Réactiver les robinets"
-                SizedBox(
-                  width: double.infinity,
-                  child: OutlinedButton(
-                    onPressed: donnees == null ? null : () => controleur.ouvrirVanne(),
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 10),
+                    /// Bouton "Réactiver les robinets"
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton(
+                        onPressed: donnees == null ? null : () => controleur.ouvrirVanne(),
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 10),
+                        ),
+                        child: const Text("Réactiver les robinets"),
+                      ),
                     ),
-                    child: const Text("Réactiver les robinets"),
-                  ),
-                ),
-                const SizedBox(height: 18),
+                    const SizedBox(height: 18),
 
-                /// POMPE + ALERTES
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    _infoBlocAvecIconeInline("POMPE", donnees?.pompe),
-                    _infoBloc("ALERTES", donnees?.alerte ?? "Aucune"),
+                    /// POMPE + ALERTES
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        _infoBlocAvecIconeInline("POMPE", donnees?.pompe),
+                        _infoBloc("ALERTES", donnees?.alerte ?? "Aucune"),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+
+                    /// ROBINET seul (aligné à gauche)
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: _infoBlocAvecIconeInline("ROBINET", donnees?.vanne),
+                    ),
+                    const SizedBox(height: 20),
+
+                    /// CONSO + REVENU
+                    _infoLigne(
+                      "CONSOMMATION",
+                      '${((donnees?.capacite ?? 1.0) * 1000).toInt()} L',
+                      "REVENU",
+                      '${((donnees?.capacite ?? 1.0) * 50).toStringAsFixed(2)} F',
+                    ),
                   ],
                 ),
-                const SizedBox(height: 10),
-
-                /// ROBINET seul (aligné à gauche)
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: _infoBlocAvecIconeInline("ROBINET", donnees?.vanne),
-                ),
-                const SizedBox(height: 20),
-
-                /// CONSO + REVENU
-                _infoLigne(
-                  "CONSOMMATION",
-                  '${((donnees?.capacite ?? 1.0) * 1000).toInt()} L',
-                  "REVENU",
-                  '${((donnees?.capacite ?? 1.0) * 50).toStringAsFixed(2)} F',
-                ),
-              ],
-            ),
-          ),
-          bottomNavigationBar: const BarreNavigationInferieure(indexActif: 0),
+              ),
+              bottomNavigationBar: const BarreNavigationInferieure(indexActif: 0),
+            );
+          },
         );
       },
     );

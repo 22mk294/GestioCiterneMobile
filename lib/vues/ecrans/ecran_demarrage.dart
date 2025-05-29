@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import '../../gestion_routes.dart';
-import 'dart:async';
 
 class EcranDemarrage extends StatefulWidget {
   @override
@@ -11,9 +11,20 @@ class _EcranDemarrageState extends State<EcranDemarrage> {
   @override
   void initState() {
     super.initState();
-    Timer(const Duration(seconds: 10), () {
-      Navigator.pushReplacementNamed(context, GestionRoutes.accueil);
-    });
+    _verifierConnexionEtNaviguer();
+  }
+
+  Future<void> _verifierConnexionEtNaviguer() async {
+    final result = await Connectivity().checkConnectivity();
+    final actif = result != ConnectivityResult.none;
+
+    await Future.delayed(const Duration(seconds: 3));
+
+    if (!mounted) return;
+    Navigator.pushReplacementNamed(
+      context,
+      actif ? GestionRoutes.accueil : GestionRoutes.erreurConnexion,
+    );
   }
 
   @override
@@ -29,8 +40,8 @@ class _EcranDemarrageState extends State<EcranDemarrage> {
               width: 150,
               height: 150,
             ),
-            SizedBox(height: 18),
-            Text(
+            const SizedBox(height: 18),
+            const Text(
               "Traitement...",
               style: TextStyle(
                 fontSize: 18,

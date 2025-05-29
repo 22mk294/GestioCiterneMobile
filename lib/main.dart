@@ -1,30 +1,44 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
+
 import 'controleurs/controleur_accueil.dart';
-import 'gestion_routes.dart'; // Ton fichier de routes
+import 'services/service_connectivite.dart';
+import 'gestion_routes.dart';
 
 void main() {
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider<ControleurAccueil>(
-          create: (_) => ControleurAccueil(),
-        ),
-        // Tu peux ajouter d’autres providers ici
+        ChangeNotifierProvider(create: (_) => ControleurAccueil()),
+        ChangeNotifierProvider(create: (_) => ServiceConnectivite()),
       ],
-      child: MyApp(),
+      child: const MyApp(),
     ),
   );
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
+  const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Gestion Citerne',
-      debugShowCheckedModeBanner: false,
-      initialRoute: GestionRoutes.demarrage,
-      routes: GestionRoutes.getRoutes(),
+    return Consumer<ServiceConnectivite>(
+      builder: (context, connectivite, child) {
+        return MaterialApp(
+          title: 'Gestion Citerne',
+          debugShowCheckedModeBanner: false,
+          initialRoute: connectivite.estConnecte
+              ? GestionRoutes.demarrage
+              : GestionRoutes.erreurConnexion,
+          routes: GestionRoutes.getRoutes(),
+        );
+      },
     );
   }
 }
