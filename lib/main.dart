@@ -1,11 +1,16 @@
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
+// Importation du package Flutter pour l'interface utilisateur.
 
-import 'controleurs/controleur_accueil.dart';
+
 import 'services/service_connectivite.dart';
 import 'gestion_routes.dart';
 
+import 'gestion_routes.dart'; // Ton fichier de routes
+// Importation du fichier de gestion des routes personnalisé.
+import 'gestion_routes.dart';
+
+
+
+// Point d'entrée de l'application.
 void main() {
   runApp(
     MultiProvider(
@@ -17,6 +22,7 @@ void main() {
     ),
   );
 }
+
 
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
@@ -39,6 +45,8 @@ class _MyAppState extends State<MyApp> {
           routes: GestionRoutes.getRoutes(),
         );
       },
-    );
-  }
-}
+
+
+
+// Définition du widget principal de l'application.
+
