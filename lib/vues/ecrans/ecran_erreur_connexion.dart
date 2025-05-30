@@ -4,7 +4,7 @@ class EcranErreurConnexion extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.red[50],
+      backgroundColor: Colors.red[100],
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(32.0),
@@ -30,7 +30,15 @@ class EcranErreurConnexion extends StatelessWidget {
                   // Redémarre l’app (forcé)
                   Navigator.pushReplacementNamed(context, '/');
                 },
-                child: const Text("Réessayer"),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red, // Couleur du bouton
+                ),
+                child: const Text(
+                  "Réessayer",
+                  style: TextStyle(
+                    color: Colors.white, // Couleur du texte
+                  ),
+                ),
               )
             ],
           ),

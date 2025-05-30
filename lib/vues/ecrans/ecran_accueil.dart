@@ -4,6 +4,9 @@ import '../composants/barre_navigation_inferieure.dart';
 import '../../controleurs/controleur_accueil.dart';
 import '../../services/service_connectivite.dart';
 import '../../gestion_routes.dart';
+import '../composants/cercle_eau.dart';
+import '../../utils/utils_affichage.dart'; // pour la couleur dynamique
+
 import 'dart:math';
 
 class EcranAccueil extends StatefulWidget {
@@ -75,10 +78,10 @@ class _EcranAccueilState extends State<EcranAccueil> {
                             children: [
                               Text(
                                 '${((donnees?.pourcentageEau ?? 0.0) * 100).toStringAsFixed(1)}%',
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 32,
                                   fontWeight: FontWeight.bold,
-                                  color: Colors.green,
+                                  color: getCouleurPourcentage(donnees?.pourcentageEau ?? 0.0),
                                 ),
                               ),
                               const SizedBox(height: 4),
@@ -105,11 +108,15 @@ class _EcranAccueilState extends State<EcranAccueil> {
                         onPressed: donnees == null ? null : () => controleur.arreterPompe(),
                         style: ElevatedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 10),
-                          backgroundColor: Colors.indigo,
+                          backgroundColor: getCouleurPourcentage(donnees?.pourcentageEau ?? 0.0),
                         ),
-                        child: const Text("Arrêter", style: TextStyle(color: Colors.white)),
+                        child: const Text(
+                          "Arrêter",
+                          style: TextStyle(color: Colors.white),
+                        ),
                       ),
                     ),
+
                     const SizedBox(height: 18),
 
                     /// Bouton "Réactiver les robinets"
@@ -216,47 +223,3 @@ class _EcranAccueilState extends State<EcranAccueil> {
   }
 }
 
-/// Painter du cercle avec couleur dynamique
-class CercleEauPainter extends CustomPainter {
-  final double pourcentage;
-
-  CercleEauPainter({required this.pourcentage});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final strokeWidth = 18.0;
-    final center = size.center(Offset.zero);
-    final radius = (size.width - strokeWidth) / 2;
-
-    final backgroundPaint = Paint()
-      ..color = Colors.grey
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeWidth;
-
-    final foregroundPaint = Paint()
-      ..color = _getCouleurPourcentage(pourcentage)
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round
-      ..strokeWidth = strokeWidth;
-
-    canvas.drawCircle(center, radius, backgroundPaint);
-
-    final angle = 2 * pi * pourcentage;
-    canvas.drawArc(
-      Rect.fromCircle(center: center, radius: radius),
-      -pi / 2,
-      angle,
-      false,
-      foregroundPaint,
-    );
-  }
-
-  Color _getCouleurPourcentage(double p) {
-    if (p < 0.2) return Colors.red;
-    if (p < 0.5) return Colors.orangeAccent;
-    return Colors.green;
-  }
-
-  @override
-  bool shouldRepaint(CustomPainter oldDelegate) => true;
-}
