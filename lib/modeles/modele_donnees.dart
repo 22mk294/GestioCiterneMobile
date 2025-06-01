@@ -21,6 +21,25 @@ class DonneesCiterne {
     return (niveauEau / capacite).clamp(0.0, 1.0);
   }
 
+  /// 🏗️ Méthode copyWith pour mise à jour partielle
+  DonneesCiterne copyWith({
+    double? niveauEau,
+    String? pompe,
+    String? vanne,
+    String? buzzer,
+    double? capacite,
+    String? alerte, required double pourcentageEau,
+  }) {
+    return DonneesCiterne(
+      niveauEau: niveauEau ?? this.niveauEau,
+      pompe: pompe ?? this.pompe,
+      vanne: vanne ?? this.vanne,
+      buzzer: buzzer ?? this.buzzer,
+      capacite: capacite ?? this.capacite,
+      alerte: alerte ?? this.alerte,
+    );
+  }
+
   factory DonneesCiterne.fromJson(Map<String, dynamic> json) {
     return DonneesCiterne(
       niveauEau: double.tryParse(json['water_level'].toString()) ?? 0.0,

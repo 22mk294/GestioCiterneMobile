@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
 
 import 'controleurs/controleur_accueil.dart';
+import 'controleurs/controleur_alertes.dart';
+import 'controleurs/controleur_parametres.dart';
 import 'services/service_connectivite.dart';
+import 'services/service_etat_eau.dart';
+import 'services/service_rafraichissement.dart';
 import 'gestion_routes.dart';
 
 void main() {
@@ -11,7 +14,12 @@ void main() {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => ControleurAccueil()),
+        ChangeNotifierProvider(create: (_) => ControleurParametres()),
         ChangeNotifierProvider(create: (_) => ServiceConnectivite()),
+        ChangeNotifierProvider(create: (_) => ServiceEtatEau()),
+        Provider(create: (_) => ServiceRafraichissementDonnees()),
+        ChangeNotifierProvider(create: (_) => ControleurAlertes()),
+
       ],
       child: const MyApp(),
     ),
@@ -26,6 +34,22 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  bool _initialise = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_initialise) {
+      final connectivite =
+      Provider.of<ServiceConnectivite>(context, listen: false);
+      if (connectivite.estConnecte) {
+        Provider.of<ServiceRafraichissementDonnees>(context, listen: false)
+            .demarrer(context);
+      }
+      _initialise = true;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer<ServiceConnectivite>(

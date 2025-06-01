@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+
 import '../modeles/modele_donnees.dart';
 import '../services/service_esp32_http.dart';
 
@@ -7,62 +8,59 @@ class ControleurAccueil with ChangeNotifier {
   final ServiceESP32Http _serviceHttp = ServiceESP32Http();
 
   DonneesCiterne? _donnees;
+  DonneesCiterne? get donnees => _donnees;
+
   bool _chargement = false;
   String? _erreur;
 
-  Timer? _timer;
-
-  ControleurAccueil() {
-    _demarrerRafraichissementAutomatique();
-  }
-
-  DonneesCiterne? get donnees => _donnees;
   bool get chargement => _chargement;
   String? get erreur => _erreur;
 
-  void _demarrerRafraichissementAutomatique() {
-    // Premier chargement immédiat
-    chargerDonnees();
-    // Lancement du timer
-    _timer = Timer.periodic(const Duration(seconds: 5), (_) {
-      chargerDonnees();
-    });
-  }
+  Timer? _timer;
 
-  Future<void> chargerDonnees() async {
+  /// Charge les données depuis l'API une fois
+  Future<void> chargerDonnees(BuildContext context) async {
     _chargement = true;
+    _erreur = null;
     notifyListeners();
 
     try {
-      _donnees = await _serviceHttp.getInfosCiterne();
-      _erreur = null;
+      final resultats = await _serviceHttp.getInfosCiterne();
+      _donnees = resultats;
     } catch (e) {
-      _erreur = "Erreur lors de la récupération : $e";
-      print("❌ $_erreur");
+      _erreur = "Erreur lors du chargement des données";
     }
 
     _chargement = false;
     notifyListeners();
   }
 
-  Future<void> activerPompe() async {
-    await _serviceHttp.envoyerCommande("pump", "ON");
-    await chargerDonnees();
+  /// Active le rafraîchissement périodique toutes les 10 secondes
+  void demarrerRafraichissement(BuildContext context) {
+    _timer?.cancel();
+    _timer = Timer.periodic(const Duration(seconds: 10), (_) {
+      chargerDonnees(context);
+    });
   }
 
-  Future<void> arreterPompe() async {
-    await _serviceHttp.envoyerCommande("pump", "OFF");
-    await chargerDonnees();
+  /// Arrête le rafraîchissement automatique
+  void arreterRafraichissement() {
+    _timer?.cancel();
+    _timer = null;
   }
 
-  Future<void> fermerVanne() async {
-    await _serviceHttp.envoyerCommande("valve", "CLOSE");
-    await chargerDonnees();
+  /// Active ou désactive la pompe
+  Future<void> reglerPompe(BuildContext context, bool activer) async {
+    final valeur = activer ? "ON" : "OFF";
+    await _serviceHttp.envoyerCommande("pump", valeur);
+    await chargerDonnees(context);
   }
 
-  Future<void> ouvrirVanne() async {
-    await _serviceHttp.envoyerCommande("valve", "OPEN");
-    await chargerDonnees();
+  /// Ouvre ou ferme la vanne
+  Future<void> reglerVanne(BuildContext context, bool ouvrir) async {
+    final valeur = ouvrir ? "OPEN" : "CLOSE";
+    await _serviceHttp.envoyerCommande("valve", valeur);
+    await chargerDonnees(context);
   }
 
   @override

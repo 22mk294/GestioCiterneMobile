@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../composants/barre_navigation_inferieure.dart';
 import '../../controleurs/controleur_accueil.dart';
 import '../../services/service_connectivite.dart';
 import '../../gestion_routes.dart';
 import '../composants/cercle_eau.dart';
-import '../../utils/utils_affichage.dart'; // pour la couleur dynamique
-
-import 'dart:math';
+import '../../utils/utils_affichage.dart';
 
 class EcranAccueil extends StatefulWidget {
   const EcranAccueil({super.key});
@@ -28,33 +27,46 @@ class _EcranAccueilState extends State<EcranAccueil> {
         return;
       }
 
-      final controleur = Provider.of<ControleurAccueil>(context, listen: false);
-      controleur.chargerDonnees();
+      Provider.of<ControleurAccueil>(context, listen: false)
+          .demarrerRafraichissement(context);
     });
+  }
+
+  @override
+  void dispose() {
+    Provider.of<ControleurAccueil>(context, listen: false).dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Consumer<ServiceConnectivite>(
-      builder: (context, connectivite, child) {
+      builder: (context, connectivite, _) {
         if (!connectivite.estConnecte) {
-          // Si la connexion est perdue, redirige immédiatement
-          Future.microtask(() =>
-              Navigator.pushReplacementNamed(context, GestionRoutes.erreurConnexion));
-          return const SizedBox.shrink(); // Évite un build inutile
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            Navigator.pushReplacementNamed(context, GestionRoutes.erreurConnexion);
+          });
+          return const SizedBox.shrink();
         }
 
         return Consumer<ControleurAccueil>(
-          builder: (context, controleur, child) {
+          builder: (context, controleur, _) {
             final donnees = controleur.donnees;
+
+            if (donnees == null) {
+              return const Scaffold(
+                body: Center(child: CircularProgressIndicator()),
+              );
+            }
+
+            final pourcentage = donnees.pourcentageEau;
+            final niveau = donnees.niveauEau;
+            final capacite = donnees.capacite;
 
             return Scaffold(
               appBar: AppBar(
-                title: const Text(
-                  "Accueil",
-                  style: TextStyle(color: Colors.black),
-                ),
-                backgroundColor: const Color(0XFFECEBF9),
+                title: const Text("Accueil", style: TextStyle(color: Colors.black)),
+                backgroundColor: const Color(0xFFECEBF9),
                 centerTitle: true,
                 elevation: 0,
               ),
@@ -63,98 +75,17 @@ class _EcranAccueilState extends State<EcranAccueil> {
                 child: Column(
                   children: [
                     const SizedBox(height: 18),
-
-                    /// Cercle de niveau d'eau
-                    SizedBox(
-                      height: 220,
-                      width: 220,
-                      child: CustomPaint(
-                        painter: CercleEauPainter(
-                          pourcentage: donnees?.pourcentageEau ?? 0.0,
-                        ),
-                        child: Center(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                '${((donnees?.pourcentageEau ?? 0.0) * 100).toStringAsFixed(1)}%',
-                                style: TextStyle(
-                                  fontSize: 32,
-                                  fontWeight: FontWeight.bold,
-                                  color: getCouleurPourcentage(donnees?.pourcentageEau ?? 0.0),
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                '${(donnees?.niveauEau ?? 0.0).toStringAsFixed(1)} L / ${(donnees?.capacite ?? 1.0).toStringAsFixed(1)} L',
-                                style: const TextStyle(fontSize: 12, color: Colors.grey),
-                              ),
-                              const SizedBox(height: 4),
-                              const Text(
-                                'NIVEAU ACTUEL',
-                                style: TextStyle(fontSize: 13, color: Colors.grey),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
+                    _buildCercleEau(pourcentage, niveau, capacite),
                     const SizedBox(height: 18),
-
-                    /// Bouton "Arrêter"
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: donnees == null ? null : () => controleur.arreterPompe(),
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 10),
-                          backgroundColor: getCouleurPourcentage(donnees?.pourcentageEau ?? 0.0),
-                        ),
-                        child: const Text(
-                          "Arrêter",
-                          style: TextStyle(color: Colors.white),
-                        ),
-                      ),
-                    ),
-
+                    _buildBoutonsCommande(controleur, pourcentage),
                     const SizedBox(height: 18),
-
-                    /// Bouton "Réactiver les robinets"
-                    SizedBox(
-                      width: double.infinity,
-                      child: OutlinedButton(
-                        onPressed: donnees == null ? null : () => controleur.ouvrirVanne(),
-                        style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 10),
-                        ),
-                        child: const Text("Réactiver les robinets"),
-                      ),
-                    ),
-                    const SizedBox(height: 18),
-
-                    /// POMPE + ALERTES
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        _infoBlocAvecIconeInline("POMPE", donnees?.pompe),
-                        _infoBloc("ALERTES", donnees?.alerte ?? "Aucune"),
-                      ],
-                    ),
-                    const SizedBox(height: 10),
-
-                    /// ROBINET seul (aligné à gauche)
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: _infoBlocAvecIconeInline("ROBINET", donnees?.vanne),
-                    ),
+                    _buildInfosStatuts(donnees),
                     const SizedBox(height: 20),
-
-                    /// CONSO + REVENU
                     _infoLigne(
                       "CONSOMMATION",
-                      '${((donnees?.capacite ?? 1.0) * 1000).toInt()} L',
+                      '${(capacite * 1000).toInt()} L',
                       "REVENU",
-                      '${((donnees?.capacite ?? 1.0) * 50).toStringAsFixed(2)} F',
+                      '${(capacite * 50).toStringAsFixed(2)} F CFA',
                     ),
                   ],
                 ),
@@ -167,6 +98,93 @@ class _EcranAccueilState extends State<EcranAccueil> {
     );
   }
 
+  /// Affiche le cercle représentant le niveau d'eau
+  Widget _buildCercleEau(double pourcentage, double niveau, double capacite) {
+    return SizedBox(
+      height: 220,
+      width: 220,
+      child: CustomPaint(
+        painter: CercleEauPainter(pourcentage: pourcentage),
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                '${(pourcentage * 100).toStringAsFixed(1)}%',
+                style: TextStyle(
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
+                  color: getCouleurPourcentage(pourcentage),
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                '${niveau.toStringAsFixed(1)} L sur ${capacite.toStringAsFixed(1)} L',
+                style: const TextStyle(fontSize: 12, color: Colors.grey),
+              ),
+              const SizedBox(height: 4),
+              const Text(
+                'NIVEAU ACTUEL',
+                style: TextStyle(fontSize: 13, color: Colors.grey),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Affiche les boutons de contrôle (pompe, vanne)
+  Widget _buildBoutonsCommande(ControleurAccueil controleur, double pourcentage) {
+    return Column(
+      children: [
+        SizedBox(
+          width: double.infinity,
+          child: ElevatedButton(
+            onPressed: () => controleur.reglerPompe(context, false),
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 10),
+              backgroundColor: getCouleurPourcentage(pourcentage),
+            ),
+            child: const Text("Arrêter", style: TextStyle(color: Colors.white)),
+          ),
+        ),
+        const SizedBox(height: 18),
+        SizedBox(
+          width: double.infinity,
+          child: OutlinedButton(
+            onPressed: () => controleur.reglerVanne(context, true),
+            style: OutlinedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 10),
+            ),
+            child: const Text("Réactiver les robinets"),
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Affiche les informations de statut (pompe, robinet, alertes)
+  Widget _buildInfosStatuts(donnees) {
+    return Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            _infoBlocAvecIconeInline("POMPE", donnees.pompe),
+            _infoBloc("ALERTES", donnees.alerte ?? "Aucune"),
+          ],
+        ),
+        const SizedBox(height: 10),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: _infoBlocAvecIconeInline("ROBINET", donnees.vanne),
+        ),
+      ],
+    );
+  }
+
+  /// Affiche une ligne avec deux blocs : gauche et droite
   Widget _infoLigne(String gaucheTitre, String gaucheValeur, String droiteTitre, String droiteValeur) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -177,18 +195,19 @@ class _EcranAccueilState extends State<EcranAccueil> {
     );
   }
 
+  /// Bloc simple (titre + valeur)
   Widget _infoBloc(String titre, String valeur) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (titre.isNotEmpty)
-          Text(titre, style: const TextStyle(color: Colors.grey)),
-        if (titre.isNotEmpty) const SizedBox(height: 4),
+        Text(titre, style: const TextStyle(color: Colors.grey)),
+        const SizedBox(height: 4),
         Text(valeur, style: const TextStyle(fontWeight: FontWeight.bold)),
       ],
     );
   }
 
+  /// Bloc avec une icône de statut (ON/OFF)
   Widget _infoBlocAvecIconeInline(String titre, String? statut) {
     final isActif = statut != null &&
         (statut.toUpperCase() == 'ON' || statut.toUpperCase() == 'OPEN');
@@ -201,18 +220,14 @@ class _EcranAccueilState extends State<EcranAccueil> {
             children: [
               TextSpan(
                 text: '$titre ',
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey,
-                  fontWeight: FontWeight.normal,
-                ),
+                style: const TextStyle(fontSize: 14, color: Colors.grey),
               ),
               WidgetSpan(
                 alignment: PlaceholderAlignment.middle,
                 child: Icon(
                   Icons.circle,
                   size: 14,
-                  color: isActif ? Colors.green : Colors.red,
+                  color: isActif ? const Color(0XFF0D9C03) : Colors.red,
                 ),
               ),
             ],
@@ -222,4 +237,3 @@ class _EcranAccueilState extends State<EcranAccueil> {
     );
   }
 }
-

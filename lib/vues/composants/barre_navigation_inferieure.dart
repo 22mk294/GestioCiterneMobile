@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
 import '../../gestion_routes.dart';
+import '../../utils/utils_affichage.dart';
+import '../../controleurs/controleur_accueil.dart'; // ⬅️ MAJ ici
 
 class BarreNavigationInferieure extends StatelessWidget {
   final int indexActif;
@@ -36,13 +40,16 @@ class BarreNavigationInferieure extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final controleur = context.watch<ControleurAccueil>();
+    final pourcentageEau = controleur.donnees?.pourcentageEau ?? 0.0;
+
     return BottomNavigationBar(
       currentIndex: indexActif,
       onTap: (index) => _naviguer(index, context),
       type: BottomNavigationBarType.fixed,
-      backgroundColor: Color(0XFFECEBF9),
-      selectedItemColor: Colors.indigo,
-      unselectedItemColor: Colors.black54,
+      backgroundColor: getCouleurPourcentage(pourcentageEau),
+      selectedItemColor: Colors.white,
+      unselectedItemColor: Colors.black45,
       elevation: 10,
       items: const [
         BottomNavigationBarItem(
