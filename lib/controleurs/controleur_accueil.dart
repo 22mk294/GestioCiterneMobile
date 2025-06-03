@@ -36,18 +36,9 @@ class ControleurAccueil with ChangeNotifier {
   }
 
   /// Active le rafraîchissement périodique toutes les 10 secondes
-  void demarrerRafraichissement(BuildContext context) {
-    _timer?.cancel();
-    _timer = Timer.periodic(const Duration(seconds: 10), (_) {
-      chargerDonnees(context);
-    });
-  }
+
 
   /// Arrête le rafraîchissement automatique
-  void arreterRafraichissement() {
-    _timer?.cancel();
-    _timer = null;
-  }
 
   /// Active ou désactive la pompe
   Future<void> reglerPompe(BuildContext context, bool activer) async {
@@ -63,9 +54,5 @@ class ControleurAccueil with ChangeNotifier {
     await chargerDonnees(context);
   }
 
-  @override
-  void dispose() {
-    _timer?.cancel();
-    super.dispose();
-  }
+
 }

@@ -19,8 +19,10 @@ class _EcranParametresState extends State<EcranParametres> {
 
   String? _pumpMode;
   double? _criticalLevel;
-  double? _pricePer20L;
   int? _refreshRate;
+  int? _pricePer20L;
+
+  bool _initialise = false;
 
   @override
   void initState() {
@@ -32,30 +34,35 @@ class _EcranParametresState extends State<EcranParametres> {
   @override
   Widget build(BuildContext context) {
     return Consumer2<ServiceConnectivite, ControleurParametres>(
-      builder: (context, serviceConnectivite, controleur, child) {
-        if (!serviceConnectivite.estConnecte) {
-          return  EcranErreurConnexion();
+      builder: (context, connectivite, controleur, child) {
+        if (!connectivite.estConnecte) {
+          return EcranErreurConnexion();
         }
 
-        if (!controleur.estCharge || controleur.parametres == null) {
+        final param = controleur.parametres;
+
+        if (param == null) {
           return const Scaffold(
             body: Center(child: CircularProgressIndicator()),
           );
         }
 
-        final param = controleur.parametres!;
-        _pumpMode ??= param.pumpMode;
-        _criticalLevel ??= param.criticalLevel;
-        _pricePer20L ??= param.pricePer20L;
-        _refreshRate ??= param.refreshRate;
+        // Initialiser une seule fois
+        if (!_initialise) {
+          _pumpMode = param.pumpMode;
+          _criticalLevel = param.criticalLevel;
+          _refreshRate = param.refreshRate;
+          _pricePer20L = param.pricePer20L;
+          _initialise = true;
+        }
 
         return Scaffold(
           appBar: AppBar(
-            title: const Text('Paramètres'),
+            title: const Text("Paramètres"),
             backgroundColor: Colors.white,
+            foregroundColor: Colors.black,
             elevation: 0,
             centerTitle: true,
-            foregroundColor: Colors.black,
           ),
           backgroundColor: const Color(0xFFF4F8FC),
           body: Padding(
@@ -64,27 +71,39 @@ class _EcranParametresState extends State<EcranParametres> {
               key: _formKey,
               child: ListView(
                 children: [
-                  _buildDropdownMode(),
+                  _buildDropdownPumpMode(),
                   const SizedBox(height: 20),
                   _buildTextField(
                     label: "Niveau critique (%)",
                     initialValue: (_criticalLevel! * 100).toStringAsFixed(0),
-                    onChanged: (val) =>
-                    _criticalLevel = double.tryParse(val) != null ? double.parse(val) / 100 : _criticalLevel,
+                    onChanged: (val) {
+                      final parsed = double.tryParse(val);
+                      if (parsed != null) {
+                        _criticalLevel = parsed / 100;
+                      }
+                    },
                   ),
                   const SizedBox(height: 20),
                   _buildTextField(
-                    label: "Prix pour 20 litres (FCFA)",
-                    initialValue: _pricePer20L!.toStringAsFixed(0),
-                    onChanged: (val) =>
-                    _pricePer20L = double.tryParse(val) ?? _pricePer20L,
+                    label: "Prix pour 20L (FCFA)",
+                    initialValue: _pricePer20L.toString(),
+                    onChanged: (val) {
+                      final parsed = int.tryParse(val);
+                      if (parsed != null) {
+                        _pricePer20L = parsed;
+                      }
+                    },
                   ),
                   const SizedBox(height: 20),
                   _buildTextField(
                     label: "Fréquence d'actualisation (sec)",
-                    initialValue: _refreshRate!.toString(),
-                    onChanged: (val) =>
-                    _refreshRate = int.tryParse(val) ?? _refreshRate,
+                    initialValue: _refreshRate.toString(),
+                    onChanged: (val) {
+                      final parsed = int.tryParse(val);
+                      if (parsed != null) {
+                        _refreshRate = parsed;
+                      }
+                    },
                   ),
                   const SizedBox(height: 30),
                   ElevatedButton(
@@ -93,16 +112,26 @@ class _EcranParametresState extends State<EcranParametres> {
                         final nouveauxParametres = ParametresCiterne(
                           pumpMode: _pumpMode!,
                           criticalLevel: _criticalLevel!,
-                          pricePer20L: _pricePer20L!,
                           refreshRate: _refreshRate!,
+                          pricePer20L: _pricePer20L!,
                         );
-                        await controleur.mettreAJour(nouveauxParametres);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('✅ Paramètres mis à jour avec succès'),
-                            backgroundColor: Colors.green,
-                          ),
-                        );
+
+                        try {
+                          await controleur.mettreAJour(nouveauxParametres);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text("✅ Paramètres mis à jour"),
+                              backgroundColor: Colors.green,
+                            ),
+                          );
+                        } catch (e) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text("❌ Échec : ${e.toString()}"),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                        }
                       }
                     },
                     child: const Text("Enregistrer"),
@@ -111,13 +140,13 @@ class _EcranParametresState extends State<EcranParametres> {
               ),
             ),
           ),
-          bottomNavigationBar: const BarreNavigationInferieure(indexActif: 1),
+          bottomNavigationBar: BarreNavigationInferieure(indexActif: 1),
         );
       },
     );
   }
 
-  Widget _buildDropdownMode() {
+  Widget _buildDropdownPumpMode() {
     return DropdownButtonFormField<String>(
       value: _pumpMode,
       decoration: const InputDecoration(
@@ -130,17 +159,18 @@ class _EcranParametresState extends State<EcranParametres> {
       ],
       onChanged: (val) {
         setState(() {
-          _pumpMode = val;
+          _pumpMode = val!;
         });
       },
-      validator: (value) => value == null ? 'Veuillez sélectionner un mode' : null,
+      validator: (val) =>
+      val == null || val.isEmpty ? "Veuillez choisir un mode" : null,
     );
   }
 
   Widget _buildTextField({
     required String label,
     required String initialValue,
-    required Function(String) onChanged,
+    required void Function(String) onChanged,
   }) {
     return TextFormField(
       initialValue: initialValue,
@@ -149,12 +179,8 @@ class _EcranParametresState extends State<EcranParametres> {
         border: const OutlineInputBorder(),
       ),
       keyboardType: TextInputType.number,
-      validator: (value) {
-        if (value == null || value.isEmpty) {
-          return 'Champ requis';
-        }
-        return null;
-      },
+      validator: (value) =>
+      value == null || value.isEmpty ? 'Champ requis' : null,
       onChanged: onChanged,
     );
   }

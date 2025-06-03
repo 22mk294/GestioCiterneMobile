@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../gestion_routes.dart';
 import '../../utils/utils_affichage.dart';
-import '../../controleurs/controleur_accueil.dart'; // ⬅️ MAJ ici
+import '../../services/service_etat_eau.dart'; // ✅ on utilise le service qui contient les données à jour
 
 class BarreNavigationInferieure extends StatelessWidget {
   final int indexActif;
@@ -40,35 +40,38 @@ class BarreNavigationInferieure extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controleur = context.watch<ControleurAccueil>();
-    final pourcentageEau = controleur.donnees?.pourcentageEau ?? 0.0;
+    return Consumer<ServiceEtatEau>(
+      builder: (context, etatEau, _) {
+        final pourcentageEau = etatEau.donnees?.pourcentageEau ?? 0.0;
 
-    return BottomNavigationBar(
-      currentIndex: indexActif,
-      onTap: (index) => _naviguer(index, context),
-      type: BottomNavigationBarType.fixed,
-      backgroundColor: getCouleurPourcentage(pourcentageEau),
-      selectedItemColor: Colors.white,
-      unselectedItemColor: Colors.black45,
-      elevation: 10,
-      items: const [
-        BottomNavigationBarItem(
-          icon: Icon(Icons.home),
-          label: 'Accueil',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.settings),
-          label: 'Paramètres',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.show_chart),
-          label: 'Historique',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.warning),
-          label: 'Alertes',
-        ),
-      ],
+        return BottomNavigationBar(
+          currentIndex: indexActif,
+          onTap: (index) => _naviguer(index, context),
+          type: BottomNavigationBarType.fixed,
+          backgroundColor: Colors.white,
+          selectedItemColor: getCouleurPourcentage(pourcentageEau),
+          unselectedItemColor: Colors.black45,
+          elevation: 10,
+          items: const [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.home),
+              label: 'Accueil',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.settings),
+              label: 'Paramètres',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.show_chart),
+              label: 'Historique',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.warning),
+              label: 'Alertes',
+            ),
+          ],
+        );
+      },
     );
   }
 }

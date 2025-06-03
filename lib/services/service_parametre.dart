@@ -4,29 +4,28 @@ import '../modeles/modele_parametres.dart';
 
 class ServiceParametresHttp {
   final String _baseUrl = "http://smartwatersystem.atwebpages.com/api";
-  final String _tankId = "1";
-  final String _apiKey = "1ac34bd67sw";
 
   Future<ParametresCiterne> getParametres() async {
-    final uri = Uri.parse("$_baseUrl/get_settings.php?tank_id=$_tankId&api_key=$_apiKey");
+    final uri = Uri.parse("$_baseUrl/get_settings.php?tank_id=1&api_key=1ac34bd67sw");
+
     final response = await http.get(uri);
 
     if (response.statusCode == 200) {
       final jsonData = jsonDecode(response.body);
       return ParametresCiterne.fromJson(jsonData);
     } else {
-      throw Exception("Erreur de chargement des paramètres : ${response.statusCode}");
+      throw Exception("Erreur lors du chargement des paramètres");
     }
   }
 
-  Future<void> mettreAJourParametres(ParametresCiterne params) async {
-    final uri = Uri.parse("$_baseUrl/update_settings.php");
+  Future<void> mettreAJourParametres(ParametresCiterne parametres) async {
+    final uri = Uri.parse("$_baseUrl/save_settings.php");
 
-    final response = await http.post(uri, body: {
-      'tank_id': _tankId,
-      'api_key': _apiKey,
-      ...params.toJson(),
-    });
+    final response = await http.post(
+      uri,
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode(parametres.toJson()),
+    );
 
     if (response.statusCode != 200) {
       throw Exception("Erreur de mise à jour des paramètres");

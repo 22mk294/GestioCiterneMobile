@@ -78,7 +78,7 @@ class EcranHistorique extends StatelessWidget {
                 },
               ),
             ),
-            bottomNavigationBar: const BarreNavigationInferieure(indexActif: 2),
+            bottomNavigationBar: BarreNavigationInferieure(indexActif: 2),
 
 
           ),

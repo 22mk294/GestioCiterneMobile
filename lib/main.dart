@@ -17,9 +17,9 @@ void main() {
         ChangeNotifierProvider(create: (_) => ControleurParametres()),
         ChangeNotifierProvider(create: (_) => ServiceConnectivite()),
         ChangeNotifierProvider(create: (_) => ServiceEtatEau()),
+        // Note : ServiceRafraichissementDonnees n'a pas besoin de notifier
         Provider(create: (_) => ServiceRafraichissementDonnees()),
         ChangeNotifierProvider(create: (_) => ControleurAlertes()),
-
       ],
       child: const MyApp(),
     ),
@@ -39,12 +39,14 @@ class _MyAppState extends State<MyApp> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+
+    // Démarrer le service de rafraîchissement une seule fois si connecté
     if (!_initialise) {
-      final connectivite =
-      Provider.of<ServiceConnectivite>(context, listen: false);
+      final connectivite = Provider.of<ServiceConnectivite>(context, listen: false);
       if (connectivite.estConnecte) {
-        Provider.of<ServiceRafraichissementDonnees>(context, listen: false)
-            .demarrer(context);
+        final serviceRafraichissement =
+        Provider.of<ServiceRafraichissementDonnees>(context, listen: false);
+        serviceRafraichissement.demarrer(context);
       }
       _initialise = true;
     }

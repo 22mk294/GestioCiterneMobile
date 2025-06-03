@@ -74,7 +74,7 @@ class _EcranAlertesState extends State<EcranAlertes> {
               );
             },
           ),
-          bottomNavigationBar: const BarreNavigationInferieure(indexActif: 3),
+          bottomNavigationBar: BarreNavigationInferieure(indexActif: 3),
         );
       },
     );

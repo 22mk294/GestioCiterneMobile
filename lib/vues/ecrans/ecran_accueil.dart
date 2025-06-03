@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../composants/barre_navigation_inferieure.dart';
 import '../../controleurs/controleur_accueil.dart';
 import '../../services/service_connectivite.dart';
+import '../../services/service_etat_eau.dart';
 import '../../gestion_routes.dart';
 import '../composants/cercle_eau.dart';
 import '../../utils/utils_affichage.dart';
@@ -19,29 +20,18 @@ class _EcranAccueilState extends State<EcranAccueil> {
   @override
   void initState() {
     super.initState();
-
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final connectivite = Provider.of<ServiceConnectivite>(context, listen: false);
       if (!connectivite.estConnecte) {
         Navigator.pushReplacementNamed(context, GestionRoutes.erreurConnexion);
-        return;
       }
-
-      Provider.of<ControleurAccueil>(context, listen: false)
-          .demarrerRafraichissement(context);
     });
   }
 
   @override
-  void dispose() {
-    Provider.of<ControleurAccueil>(context, listen: false).dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return Consumer<ServiceConnectivite>(
-      builder: (context, connectivite, _) {
+    return Consumer2<ServiceConnectivite, ServiceEtatEau>(
+      builder: (context, connectivite, etatEau, _) {
         if (!connectivite.estConnecte) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             Navigator.pushReplacementNamed(context, GestionRoutes.erreurConnexion);
@@ -49,56 +39,52 @@ class _EcranAccueilState extends State<EcranAccueil> {
           return const SizedBox.shrink();
         }
 
-        return Consumer<ControleurAccueil>(
-          builder: (context, controleur, _) {
-            final donnees = controleur.donnees;
+        final donnees = etatEau.donnees;
+        if (donnees == null) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
 
-            if (donnees == null) {
-              return const Scaffold(
-                body: Center(child: CircularProgressIndicator()),
-              );
-            }
+        final pourcentage = donnees.pourcentageEau;
+        final niveau = donnees.niveauEau;
+        final capacite = donnees.capacite;
 
-            final pourcentage = donnees.pourcentageEau;
-            final niveau = donnees.niveauEau;
-            final capacite = donnees.capacite;
+        final controleur = Provider.of<ControleurAccueil>(context, listen: false);
 
-            return Scaffold(
-              appBar: AppBar(
-                title: const Text("Accueil", style: TextStyle(color: Colors.black)),
-                backgroundColor: const Color(0xFFECEBF9),
-                centerTitle: true,
-                elevation: 0,
-              ),
-              body: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10),
-                child: Column(
-                  children: [
-                    const SizedBox(height: 18),
-                    _buildCercleEau(pourcentage, niveau, capacite),
-                    const SizedBox(height: 18),
-                    _buildBoutonsCommande(controleur, pourcentage),
-                    const SizedBox(height: 18),
-                    _buildInfosStatuts(donnees),
-                    const SizedBox(height: 20),
-                    _infoLigne(
-                      "CONSOMMATION",
-                      '${(capacite * 1000).toInt()} L',
-                      "REVENU",
-                      '${(capacite * 50).toStringAsFixed(2)} F CFA',
-                    ),
-                  ],
+        return Scaffold(
+          appBar: AppBar(
+            title: const Text("Accueil", style: TextStyle(color: Colors.black)),
+            backgroundColor: const Color(0xFFECEBF9),
+            centerTitle: true,
+            elevation: 0,
+          ),
+          body: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10),
+            child: Column(
+              children: [
+                const SizedBox(height: 18),
+                _buildCercleEau(pourcentage, niveau, capacite),
+                const SizedBox(height: 18),
+                _buildBoutonsCommande(controleur, pourcentage),
+                const SizedBox(height: 18),
+                _buildInfosStatuts(donnees),
+                const SizedBox(height: 20),
+                _infoLigne(
+                  "CONSOMMATION",
+                  '${(capacite * 1000).toInt()} L',
+                  "REVENU",
+                  '${(capacite * 50).toStringAsFixed(2)} F CFA',
                 ),
-              ),
-              bottomNavigationBar: const BarreNavigationInferieure(indexActif: 0),
-            );
-          },
+              ],
+            ),
+          ),
+          bottomNavigationBar: BarreNavigationInferieure(indexActif: 0),
         );
       },
     );
   }
 
-  /// Affiche le cercle représentant le niveau d'eau
   Widget _buildCercleEau(double pourcentage, double niveau, double capacite) {
     return SizedBox(
       height: 220,
@@ -134,7 +120,6 @@ class _EcranAccueilState extends State<EcranAccueil> {
     );
   }
 
-  /// Affiche les boutons de contrôle (pompe, vanne)
   Widget _buildBoutonsCommande(ControleurAccueil controleur, double pourcentage) {
     return Column(
       children: [
@@ -164,7 +149,6 @@ class _EcranAccueilState extends State<EcranAccueil> {
     );
   }
 
-  /// Affiche les informations de statut (pompe, robinet, alertes)
   Widget _buildInfosStatuts(donnees) {
     return Column(
       children: [
@@ -184,7 +168,6 @@ class _EcranAccueilState extends State<EcranAccueil> {
     );
   }
 
-  /// Affiche une ligne avec deux blocs : gauche et droite
   Widget _infoLigne(String gaucheTitre, String gaucheValeur, String droiteTitre, String droiteValeur) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -195,7 +178,6 @@ class _EcranAccueilState extends State<EcranAccueil> {
     );
   }
 
-  /// Bloc simple (titre + valeur)
   Widget _infoBloc(String titre, String valeur) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -207,7 +189,6 @@ class _EcranAccueilState extends State<EcranAccueil> {
     );
   }
 
-  /// Bloc avec une icône de statut (ON/OFF)
   Widget _infoBlocAvecIconeInline(String titre, String? statut) {
     final isActif = statut != null &&
         (statut.toUpperCase() == 'ON' || statut.toUpperCase() == 'OPEN');
