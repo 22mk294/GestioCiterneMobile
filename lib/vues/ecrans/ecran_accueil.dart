@@ -8,6 +8,7 @@ import '../../services/service_etat_eau.dart';
 import '../../gestion_routes.dart';
 import '../composants/cercle_eau.dart';
 import '../../utils/utils_affichage.dart';
+import '../../modeles/modele_donnees.dart';
 
 class EcranAccueil extends StatefulWidget {
   const EcranAccueil({super.key});
@@ -24,14 +25,16 @@ class _EcranAccueilState extends State<EcranAccueil> {
       final connectivite = Provider.of<ServiceConnectivite>(context, listen: false);
       if (!connectivite.estConnecte) {
         Navigator.pushReplacementNamed(context, GestionRoutes.erreurConnexion);
+      } else {
+        Provider.of<ControleurAccueil>(context, listen: false).chargerDonnees(context);
       }
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Consumer2<ServiceConnectivite, ServiceEtatEau>(
-      builder: (context, connectivite, etatEau, _) {
+    return Consumer3<ServiceConnectivite, ServiceEtatEau, ControleurAccueil>(
+      builder: (context, connectivite, etatEau, controleur, _) {
         if (!connectivite.estConnecte) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             Navigator.pushReplacementNamed(context, GestionRoutes.erreurConnexion);
@@ -39,8 +42,9 @@ class _EcranAccueilState extends State<EcranAccueil> {
           return const SizedBox.shrink();
         }
 
-        final donnees = etatEau.donnees;
-        if (donnees == null) {
+        final donnees = etatEau.donnees ?? controleur.donnees;
+
+        if (controleur.chargement || donnees == null) {
           return const Scaffold(
             body: Center(child: CircularProgressIndicator()),
           );
@@ -50,32 +54,30 @@ class _EcranAccueilState extends State<EcranAccueil> {
         final niveau = donnees.niveauEau;
         final capacite = donnees.capacite;
 
-        final controleur = Provider.of<ControleurAccueil>(context, listen: false);
-
         return Scaffold(
           appBar: AppBar(
-            title: const Text("Accueil", style: TextStyle(color: Colors.black)),
-            backgroundColor: const Color(0xFFECEBF9),
+            title: const Text('Accueil'),
             centerTitle: true,
+            backgroundColor: Colors.white,
             elevation: 0,
+            foregroundColor: Colors.black,
           ),
-          body: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10),
+          backgroundColor: const Color(0xFFF4F8FC),
+          body: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 30),
             child: Column(
               children: [
-                const SizedBox(height: 18),
                 _buildCercleEau(pourcentage, niveau, capacite),
-                const SizedBox(height: 18),
-                _buildBoutonsCommande(controleur, pourcentage),
-                const SizedBox(height: 18),
-                _buildInfosStatuts(donnees),
-                const SizedBox(height: 20),
-                _infoLigne(
-                  "CONSOMMATION",
-                  '${(capacite * 1000).toInt()} L',
-                  "REVENU",
-                  '${(capacite * 50).toStringAsFixed(2)} F CFA',
+                const SizedBox(height: 10),
+                const Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    "Contrôles du système",
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
                 ),
+                const SizedBox(height: 12),
+                _buildCartesCommandes(donnees, controleur),
               ],
             ),
           ),
@@ -87,8 +89,8 @@ class _EcranAccueilState extends State<EcranAccueil> {
 
   Widget _buildCercleEau(double pourcentage, double niveau, double capacite) {
     return SizedBox(
-      height: 220,
-      width: 220,
+      height: 200,
+      width: 200,
       child: CustomPaint(
         painter: CercleEauPainter(pourcentage: pourcentage),
         child: Center(
@@ -98,20 +100,20 @@ class _EcranAccueilState extends State<EcranAccueil> {
               Text(
                 '${(pourcentage * 100).toStringAsFixed(1)}%',
                 style: TextStyle(
-                  fontSize: 32,
+                  fontSize: 30,
                   fontWeight: FontWeight.bold,
                   color: getCouleurPourcentage(pourcentage),
                 ),
               ),
               const SizedBox(height: 4),
               Text(
-                '${niveau.toStringAsFixed(1)} L sur ${capacite.toStringAsFixed(1)} L',
-                style: const TextStyle(fontSize: 12, color: Colors.grey),
+                '${niveau.toStringAsFixed(1)} L / ${capacite.toStringAsFixed(1)} L',
+                style: const TextStyle(fontSize: 12, color: Colors.blue),
               ),
               const SizedBox(height: 4),
               const Text(
                 'NIVEAU ACTUEL',
-                style: TextStyle(fontSize: 13, color: Colors.grey),
+                style: TextStyle(fontSize: 13, color: Colors.black, fontWeight: FontWeight.bold),
               ),
             ],
           ),
@@ -120,101 +122,111 @@ class _EcranAccueilState extends State<EcranAccueil> {
     );
   }
 
-  Widget _buildBoutonsCommande(ControleurAccueil controleur, double pourcentage) {
-    return Column(
+  Widget _buildCartesCommandes(DonneesCiterne donnees, ControleurAccueil controleur) {
+    final consommation = (donnees.capacite * 1000).toInt(); // litres
+    final revenu = (donnees.capacite * 50).toStringAsFixed(2); // FCFA
+
+    return GridView.count(
+      crossAxisCount: 2,
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      mainAxisSpacing: 10,
+      crossAxisSpacing: 10,
       children: [
-        SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            onPressed: () => controleur.reglerPompe(context, false),
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 10),
-              backgroundColor: getCouleurPourcentage(pourcentage),
-            ),
-            child: const Text("Arrêter", style: TextStyle(color: Colors.white)),
-          ),
+        _carteCommande(
+          titre: "Pompe",
+          icone: Icons.water,
+          actif: donnees.pompe.toUpperCase() == "ON",
+          onChanged: (val) async {
+            try {
+              await controleur.reglerPompe(context, val);
+
+            } catch (e) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text("Erreur : ${e.toString()}")),
+              );
+            }
+          },
         ),
-        const SizedBox(height: 18),
-        SizedBox(
-          width: double.infinity,
-          child: OutlinedButton(
-            onPressed: () => controleur.reglerVanne(context, true),
-            style: OutlinedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 10),
-            ),
-            child: const Text("Réactiver les robinets"),
-          ),
+        _carteCommande(
+          titre: "Robinet",
+          icone: Icons.water_drop,
+          actif: donnees.vanne.toUpperCase() == "OPEN",
+          onChanged: (val) async {
+            try {
+              await controleur.reglerVanne(context, val);
+
+
+            } catch (e) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text("Erreur : ${e.toString()}")),
+              );
+            }
+          },
+        ),
+        _carteStatique(
+          titre: "Consommation",
+          icone: Icons.local_drink,
+          valeur: "$consommation L",
+        ),
+        _carteStatique(
+          titre: "Revenu",
+          icone: Icons.attach_money,
+          valeur: "$revenu Fc",
         ),
       ],
     );
   }
 
-  Widget _buildInfosStatuts(donnees) {
-    return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  Widget _carteCommande({
+    required String titre,
+    required IconData icone,
+    required bool actif,
+    required Function(bool) onChanged,
+  }) {
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      child: Padding(
+        padding: const EdgeInsets.all(10),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            _infoBlocAvecIconeInline("POMPE", donnees.pompe),
-            _infoBloc("ALERTES", donnees.alerte ?? "Aucune"),
+            Icon(icone, size: 30, color: actif ? Colors.blue : Colors.red),
+            const SizedBox(height: 8),
+            Text(titre, style: const TextStyle(fontWeight: FontWeight.bold)),
+            Switch(
+              value: actif,
+              onChanged: onChanged,
+              activeColor: Colors.blue,
+            ),
           ],
         ),
-        const SizedBox(height: 10),
-        Align(
-          alignment: Alignment.centerLeft,
-          child: _infoBlocAvecIconeInline("ROBINET", donnees.vanne),
+      ),
+    );
+  }
+
+  Widget _carteStatique({
+    required String titre,
+    required IconData icone,
+    required String valeur,
+  }) {
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      child: Padding(
+        padding: const EdgeInsets.all(10),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icone, size: 32, color: Colors.blue),
+            const SizedBox(height: 8),
+            Text(titre, style: const TextStyle(fontWeight: FontWeight.bold)),
+            const SizedBox(height: 6),
+            Text(valeur, style: const TextStyle(fontSize: 14), textAlign: TextAlign.center),
+          ],
         ),
-      ],
-    );
-  }
-
-  Widget _infoLigne(String gaucheTitre, String gaucheValeur, String droiteTitre, String droiteValeur) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        _infoBloc(gaucheTitre, gaucheValeur),
-        _infoBloc(droiteTitre, droiteValeur),
-      ],
-    );
-  }
-
-  Widget _infoBloc(String titre, String valeur) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(titre, style: const TextStyle(color: Colors.grey)),
-        const SizedBox(height: 4),
-        Text(valeur, style: const TextStyle(fontWeight: FontWeight.bold)),
-      ],
-    );
-  }
-
-  Widget _infoBlocAvecIconeInline(String titre, String? statut) {
-    final isActif = statut != null &&
-        (statut.toUpperCase() == 'ON' || statut.toUpperCase() == 'OPEN');
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        RichText(
-          text: TextSpan(
-            children: [
-              TextSpan(
-                text: '$titre ',
-                style: const TextStyle(fontSize: 14, color: Colors.grey),
-              ),
-              WidgetSpan(
-                alignment: PlaceholderAlignment.middle,
-                child: Icon(
-                  Icons.circle,
-                  size: 14,
-                  color: isActif ? const Color(0XFF0D9C03) : Colors.red,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
+      ),
     );
   }
 }

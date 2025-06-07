@@ -42,15 +42,50 @@ class ControleurAccueil with ChangeNotifier {
 
   /// Active ou désactive la pompe
   Future<void> reglerPompe(BuildContext context, bool activer) async {
-    final valeur = activer ? "ON" : "OFF";
-    await _serviceHttp.envoyerCommande("pump", valeur);
+    final pompe = activer ? "1" : "0";
+    final vanne = _donnees?.vanne.toUpperCase() == "OPEN" ? "1" : "0";
+    final buzzer = _donnees?.buzzer.toUpperCase() == "ON" ? "1" : "0";
+
+    final success = await _serviceHttp.envoyerCommandeControle(
+      pumpState: pompe,
+      valveState: vanne,
+      buzzerState: buzzer,
+    );
+
+    if (!success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Erreur lors du contrôle de la pompe")),
+      );
+    }
+
     await chargerDonnees(context);
   }
 
+
   /// Ouvre ou ferme la vanne
   Future<void> reglerVanne(BuildContext context, bool ouvrir) async {
-    final valeur = ouvrir ? "OPEN" : "CLOSE";
-    await _serviceHttp.envoyerCommande("valve", valeur);
+    final pompe = _donnees?.pompe.toUpperCase() == "ON" ? "1" : "0";
+    final vanne = ouvrir ? "1" : "0";
+    final buzzer = _donnees?.buzzer.toUpperCase() == "ON" ? "1" : "0";
+
+    final success = await _serviceHttp.envoyerCommandeControle(
+      pumpState: pompe,
+      valveState: vanne,
+      buzzerState: buzzer,
+    );
+
+    if (!success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Erreur lors du contrôle du robinet")),
+      );
+    }
+
+    await chargerDonnees(context);
+  }
+  /// Active ou désactive l'alarme (buzzer)
+  Future<void> reglerBuzzer(BuildContext context, bool activer) async {
+    final valeur = activer ? "ON" : "OFF";
+    await _serviceHttp.envoyerCommande("buzzer", valeur);
     await chargerDonnees(context);
   }
 

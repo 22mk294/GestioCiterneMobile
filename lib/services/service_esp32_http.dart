@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
 import '../modeles/modele_donnees.dart';
 
@@ -40,4 +41,40 @@ class ServiceESP32Http {
       throw Exception("Échec de la commande : $action -> $valeur (${response.statusCode})");
     }
   }
+
+  Future<bool> envoyerCommandeControle({
+    required String pumpState,
+    required String valveState,
+    required String buzzerState,
+  }) async {
+    final uri = Uri.parse("$_baseUrl/save_control.php");
+
+    final corps = jsonEncode({
+      "tank_id": int.parse(_tankId),
+      "api_key": _apiKey,
+      "pump_state": pumpState,
+      "valve_state": valveState,
+      "buzzer_state": buzzerState,
+    });
+
+    try {
+      final response = await http.post(
+        uri,
+        headers: {'Content-Type': 'application/json'},
+        body: corps,
+      );
+
+      if (response.statusCode == 200) {
+        final json = jsonDecode(response.body);
+        return json["success"] == true || json["status"] == "success";
+      } else {
+        debugPrint("Erreur API: ${response.statusCode} - ${response.body}");
+        return false;
+      }
+    } catch (e) {
+      debugPrint("Exception lors de l'envoi du contrôle : $e");
+      return false;
+    }
+  }
+
 }
