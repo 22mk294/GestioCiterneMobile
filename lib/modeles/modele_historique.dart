@@ -13,7 +13,7 @@ class EntreeHistorique {
     return EntreeHistorique(
       date: DateTime.parse(json['date']),
       consommation: json['water_usage'],
-      cout: json['cost'].toDouble(),
+      cout: (json['cost'] as num).toDouble(),
     );
   }
 }

@@ -6,6 +6,7 @@ import '../../controleurs/controleur_alertes.dart';
 import '../../modeles/modele_alerte.dart';
 import '../composants/barre_navigation_inferieure.dart';
 import '../../gestion_routes.dart';
+import '../composants/barre_superieure.dart';
 
 class EcranAlertes extends StatefulWidget {
   const EcranAlertes({super.key});
@@ -42,13 +43,8 @@ class _EcranAlertesState extends State<EcranAlertes> {
         }
 
         return Scaffold(
-          appBar: AppBar(
-            title: const Text('Alertes'),
-            centerTitle: true,
-            backgroundColor: Colors.white,
-            elevation: 0,
-            foregroundColor: Colors.black,
-          ),
+          appBar: const BarreSuperieure(titre: 'Alerte'),
+
           backgroundColor: const Color(0xFFF4F8FC),
           body: Consumer<ControleurAlertes>(
             builder: (context, controleur, _) {

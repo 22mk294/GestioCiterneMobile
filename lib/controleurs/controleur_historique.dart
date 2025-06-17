@@ -7,16 +7,19 @@ class ControleurHistorique with ChangeNotifier {
 
   List<EntreeHistorique> _historique = [];
   bool _chargement = false;
+  int _jours = 7; // valeur par défaut
 
   List<EntreeHistorique> get historique => _historique;
   bool get chargement => _chargement;
+  int get jours => _jours;
 
-  Future<void> chargerHistorique() async {
+  Future<void> chargerHistorique({int jours = 7}) async {
     _chargement = true;
+    _jours = jours;
     notifyListeners();
 
     try {
-      _historique = await _service.recupererHistorique();
+      _historique = await _service.recupererHistorique(jours);
     } catch (e) {
       print("Erreur historique : $e");
     }

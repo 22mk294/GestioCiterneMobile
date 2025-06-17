@@ -5,6 +5,7 @@ import '../../controleurs/controleur_parametres.dart';
 import '../../modeles/modele_parametres.dart';
 import '../../services/service_connectivite.dart';
 import '../composants/barre_navigation_inferieure.dart';
+import '../composants/barre_superieure.dart';
 import 'ecran_erreur_connexion.dart';
 
 class EcranParametres extends StatefulWidget {
@@ -57,13 +58,8 @@ class _EcranParametresState extends State<EcranParametres> {
         }
 
         return Scaffold(
-          appBar: AppBar(
-            title: const Text("Paramètres"),
-            backgroundColor: Colors.white,
-            foregroundColor: Colors.black,
-            elevation: 0,
-            centerTitle: true,
-          ),
+          appBar: const BarreSuperieure(titre: 'Paramètre'),
+
           backgroundColor: const Color(0xFFF4F8FC),
           body: Padding(
             padding: const EdgeInsets.all(16.0),

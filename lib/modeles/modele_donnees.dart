@@ -1,5 +1,5 @@
 class DonneesCiterne {
-  final double niveauEau;
+  final double niveauEau; // => déjà en pourcentage (ex: 78.0)
   final String pompe;
   final String vanne;
   final String buzzer;
@@ -15,20 +15,16 @@ class DonneesCiterne {
     required this.alerte,
   });
 
-  // ➕ Pourcentage calculé (valeur entre 0.0 et 1.0)
-  double get pourcentageEau {
-    if (capacite == 0) return 0.0;
-    return (niveauEau / capacite).clamp(0.0, 1.0);
-  }
+  /// 🔄 Convertit le niveau en % vers une valeur [0.0 - 1.0]
+  double get pourcentageEau => (niveauEau / 100).clamp(0.0, 1.0);
 
-  /// 🏗️ Méthode copyWith pour mise à jour partielle
   DonneesCiterne copyWith({
     double? niveauEau,
     String? pompe,
     String? vanne,
     String? buzzer,
     double? capacite,
-    String? alerte, required double pourcentageEau,
+    String? alerte,
   }) {
     return DonneesCiterne(
       niveauEau: niveauEau ?? this.niveauEau,
@@ -42,7 +38,7 @@ class DonneesCiterne {
 
   factory DonneesCiterne.fromJson(Map<String, dynamic> json) {
     return DonneesCiterne(
-      niveauEau: double.tryParse(json['water_level'].toString()) ?? 0.0,
+      niveauEau: double.tryParse(json['water_level'].toString()) ?? 0.0, // déjà en %
       pompe: json['pump'],
       vanne: json['valve'],
       buzzer: json['buzzer'],

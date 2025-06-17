@@ -15,12 +15,7 @@ class ServiceEtatEau with ChangeNotifier {
     notifyListeners();
   }
 
-  void mettreAJourPourcentage(double pourcentage) {
-    if (_donnees != null) {
-      _donnees = _donnees!.copyWith(pourcentageEau: pourcentage);
-      notifyListeners();
-    }
-  }
+
 
 
 }

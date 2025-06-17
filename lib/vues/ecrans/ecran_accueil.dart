@@ -6,6 +6,7 @@ import '../../controleurs/controleur_accueil.dart';
 import '../../services/service_connectivite.dart';
 import '../../services/service_etat_eau.dart';
 import '../../gestion_routes.dart';
+import '../composants/barre_superieure.dart';
 import '../composants/cercle_eau.dart';
 import '../../utils/utils_affichage.dart';
 import '../../modeles/modele_donnees.dart';
@@ -55,14 +56,18 @@ class _EcranAccueilState extends State<EcranAccueil> {
         final capacite = donnees.capacite;
 
         return Scaffold(
-          appBar: AppBar(
-            title: const Text('Accueil'),
-            centerTitle: true,
-            backgroundColor: Colors.white,
-            elevation: 0,
-            foregroundColor: Colors.black,
+          appBar: BarreSuperieure(
+            titre: 'Accueil',
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.person),
+                onPressed: () {
+                  Navigator.pushNamed(context, GestionRoutes.profil);
+                },
+              ),
+            ],
           ),
-          backgroundColor: const Color(0xFFF4F8FC),
+          backgroundColor: const Color(0xFFE3EDF7),
           body: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 30),
             child: Column(
@@ -113,7 +118,7 @@ class _EcranAccueilState extends State<EcranAccueil> {
               const SizedBox(height: 4),
               const Text(
                 'NIVEAU ACTUEL',
-                style: TextStyle(fontSize: 13, color: Colors.black, fontWeight: FontWeight.bold),
+                style: TextStyle(fontSize: 13, color: Colors.blueGrey, fontWeight: FontWeight.bold),
               ),
             ],
           ),
@@ -124,45 +129,27 @@ class _EcranAccueilState extends State<EcranAccueil> {
 
   Widget _buildCartesCommandes(DonneesCiterne donnees, ControleurAccueil controleur) {
     final consommation = (donnees.capacite * 1000).toInt(); // litres
-    final revenu = (donnees.capacite * 50).toStringAsFixed(2); // FCFA
+    final revenu = (donnees.capacite * 50).toStringAsFixed(2); // FC
 
     return GridView.count(
       crossAxisCount: 2,
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      mainAxisSpacing: 10,
-      crossAxisSpacing: 10,
+      mainAxisSpacing: 12,
+      crossAxisSpacing: 12,
+      childAspectRatio: 1.2,
       children: [
         _carteCommande(
           titre: "Pompe",
           icone: Icons.water,
           actif: donnees.pompe.toUpperCase() == "ON",
-          onChanged: (val) async {
-            try {
-              await controleur.reglerPompe(context, val);
-
-            } catch (e) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text("Erreur : ${e.toString()}")),
-              );
-            }
-          },
+          onChanged: (val) => controleur.reglerPompe(context, val),
         ),
         _carteCommande(
           titre: "Robinet",
           icone: Icons.water_drop,
           actif: donnees.vanne.toUpperCase() == "OPEN",
-          onChanged: (val) async {
-            try {
-              await controleur.reglerVanne(context, val);
-
-
-            } catch (e) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text("Erreur : ${e.toString()}")),
-              );
-            }
-          },
+          onChanged: (val) => controleur.reglerVanne(context, val),
         ),
         _carteStatique(
           titre: "Consommation",
@@ -188,17 +175,19 @@ class _EcranAccueilState extends State<EcranAccueil> {
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       child: Padding(
-        padding: const EdgeInsets.all(10),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icone, size: 30, color: actif ? Colors.blue : Colors.red),
-            const SizedBox(height: 8),
-            Text(titre, style: const TextStyle(fontWeight: FontWeight.bold)),
+            Icon(icone, size: 24, color: actif ? Colors.green : Colors.red),
+            const SizedBox(height: 4),
+            Text(titre, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+            const SizedBox(height: 4),
             Switch(
               value: actif,
               onChanged: onChanged,
-              activeColor: Colors.blue,
+              activeColor: Colors.green,
+              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
           ],
         ),
@@ -215,15 +204,15 @@ class _EcranAccueilState extends State<EcranAccueil> {
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       child: Padding(
-        padding: const EdgeInsets.all(10),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icone, size: 32, color: Colors.blue),
-            const SizedBox(height: 8),
-            Text(titre, style: const TextStyle(fontWeight: FontWeight.bold)),
-            const SizedBox(height: 6),
-            Text(valeur, style: const TextStyle(fontSize: 14), textAlign: TextAlign.center),
+            Icon(icone, size: 22, color: Colors.indigo),
+            const SizedBox(height: 4),
+            Text(titre, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+            const SizedBox(height: 4),
+            Text(valeur, style: const TextStyle(fontSize: 13, color: Colors.black87), textAlign: TextAlign.center),
           ],
         ),
       ),

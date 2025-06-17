@@ -10,7 +10,7 @@ class CercleEauPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final strokeWidth = 18.0;
+    final strokeWidth = 13.0;
     final center = size.center(Offset.zero);
     final radius = (size.width - strokeWidth) / 2;
 
