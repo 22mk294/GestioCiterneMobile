@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import '../../gestion_routes.dart';
+import '../../services/service_session.dart';
 
 class EcranDemarrage extends StatefulWidget {
   @override
@@ -11,19 +12,27 @@ class _EcranDemarrageState extends State<EcranDemarrage> {
   @override
   void initState() {
     super.initState();
-    _verifierConnexionEtNaviguer();
+    _verifierConnexionEtSession();
   }
 
-  Future<void> _verifierConnexionEtNaviguer() async {
+  Future<void> _verifierConnexionEtSession() async {
     final result = await Connectivity().checkConnectivity();
     final actif = result != ConnectivityResult.none;
 
-    await Future.delayed(const Duration(seconds: 3));
+    await Future.delayed(const Duration(seconds: 2));
 
     if (!mounted) return;
+
+    if (!actif) {
+      Navigator.pushReplacementNamed(context, GestionRoutes.erreurConnexion);
+      return;
+    }
+
+    final estConnecte = await ServiceSession.estConnecte();
+
     Navigator.pushReplacementNamed(
       context,
-      actif ? GestionRoutes.accueil : GestionRoutes.erreurConnexion,
+      estConnecte ? GestionRoutes.accueil : GestionRoutes.connexion,
     );
   }
 

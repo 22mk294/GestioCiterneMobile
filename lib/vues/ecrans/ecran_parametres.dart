@@ -1,78 +1,183 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
+import '../../controleurs/controleur_parametres.dart';
+import '../../modeles/modele_parametres.dart';
 import '../../services/service_connectivite.dart';
 import '../composants/barre_navigation_inferieure.dart';
+import '../composants/barre_superieure.dart';
 import 'ecran_erreur_connexion.dart';
 
-class EcranParametres extends StatelessWidget {
+class EcranParametres extends StatefulWidget {
   const EcranParametres({super.key});
 
   @override
+  State<EcranParametres> createState() => _EcranParametresState();
+}
+
+class _EcranParametresState extends State<EcranParametres> {
+  final _formKey = GlobalKey<FormState>();
+
+  String? _pumpMode;
+  double? _criticalLevel;
+  int? _refreshRate;
+  int? _pricePer20L;
+
+  bool _initialise = false;
+
+  @override
+  void initState() {
+    super.initState();
+    final controleur = Provider.of<ControleurParametres>(context, listen: false);
+    controleur.chargerParametres();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Consumer<ServiceConnectivite>(
-      builder: (context, serviceConnectivite, child) {
-        if (!serviceConnectivite.estConnecte) {
-          return EcranErreurConnexion(); // Affiche la page d’erreur
+    return Consumer2<ServiceConnectivite, ControleurParametres>(
+      builder: (context, connectivite, controleur, child) {
+        if (!connectivite.estConnecte) {
+          return EcranErreurConnexion();
+        }
+
+        final param = controleur.parametres;
+
+        if (param == null) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
+
+        // Initialiser une seule fois
+        if (!_initialise) {
+          _pumpMode = param.pumpMode;
+          _criticalLevel = param.criticalLevel;
+          _refreshRate = param.refreshRate;
+          _pricePer20L = param.pricePer20L;
+          _initialise = true;
         }
 
         return Scaffold(
-          appBar: AppBar(
-            title: const Text('Paramètres'),
-            backgroundColor: Colors.white,
-            elevation: 0,
-            centerTitle: true,
-            foregroundColor: Colors.black,
-          ),
+          appBar: const BarreSuperieure(titre: 'Paramètre'),
+
           backgroundColor: const Color(0xFFF4F8FC),
           body: Padding(
             padding: const EdgeInsets.all(16.0),
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.grey.shade300),
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
+            child: Form(
+              key: _formKey,
+              child: ListView(
                 children: [
-                  _buildLigneParametre('Niveau critique', '30%'),
-                  _buildLigneParametre('Mode', 'Automatique'),
-                  _buildLigneParametre('Notifications', 'Activées'),
-                  _buildLigneParametre('Prix pour 20 litres', '1,00'),
+                  _buildDropdownPumpMode(),
+                  const SizedBox(height: 20),
+                  _buildTextField(
+                    label: "Niveau critique (%)",
+                    initialValue: (_criticalLevel! * 100).toStringAsFixed(0),
+                    onChanged: (val) {
+                      final parsed = double.tryParse(val);
+                      if (parsed != null) {
+                        _criticalLevel = parsed / 100;
+                      }
+                    },
+                  ),
+                  const SizedBox(height: 20),
+                  _buildTextField(
+                    label: "Prix pour 20L (FCFA)",
+                    initialValue: _pricePer20L.toString(),
+                    onChanged: (val) {
+                      final parsed = int.tryParse(val);
+                      if (parsed != null) {
+                        _pricePer20L = parsed;
+                      }
+                    },
+                  ),
+                  const SizedBox(height: 20),
+                  _buildTextField(
+                    label: "Fréquence d'actualisation (sec)",
+                    initialValue: _refreshRate.toString(),
+                    onChanged: (val) {
+                      final parsed = int.tryParse(val);
+                      if (parsed != null) {
+                        _refreshRate = parsed;
+                      }
+                    },
+                  ),
+                  const SizedBox(height: 30),
+                  ElevatedButton(
+                    onPressed: () async {
+                      if (_formKey.currentState!.validate()) {
+                        final nouveauxParametres = ParametresCiterne(
+                          pumpMode: _pumpMode!,
+                          criticalLevel: _criticalLevel!,
+                          refreshRate: _refreshRate!,
+                          pricePer20L: _pricePer20L!,
+                        );
+
+                        try {
+                          await controleur.mettreAJour(nouveauxParametres);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text("✅ Paramètres mis à jour"),
+                              backgroundColor: Colors.green,
+                            ),
+                          );
+                        } catch (e) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text("❌ Échec : ${e.toString()}"),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                        }
+                      }
+                    },
+                    child: const Text("Enregistrer"),
+                  ),
                 ],
               ),
             ),
           ),
-          bottomNavigationBar: const BarreNavigationInferieure(indexActif: 1),
+          bottomNavigationBar: BarreNavigationInferieure(indexActif: 1),
         );
       },
     );
   }
 
-  Widget _buildLigneParametre(String libelle, String valeur) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-      decoration: const BoxDecoration(
-        border: Border(
-          bottom: BorderSide(color: Color(0xFFE0E0E0)),
-        ),
+  Widget _buildDropdownPumpMode() {
+    return DropdownButtonFormField<String>(
+      value: _pumpMode,
+      decoration: const InputDecoration(
+        labelText: "Mode de la pompe",
+        border: OutlineInputBorder(),
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            libelle,
-            style: const TextStyle(fontSize: 16),
-          ),
-          Text(
-            valeur,
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 16,
-            ),
-          ),
-        ],
+      items: const [
+        DropdownMenuItem(value: "auto", child: Text("Automatique")),
+        DropdownMenuItem(value: "manual", child: Text("Manuel")),
+      ],
+      onChanged: (val) {
+        setState(() {
+          _pumpMode = val!;
+        });
+      },
+      validator: (val) =>
+      val == null || val.isEmpty ? "Veuillez choisir un mode" : null,
+    );
+  }
+
+  Widget _buildTextField({
+    required String label,
+    required String initialValue,
+    required void Function(String) onChanged,
+  }) {
+    return TextFormField(
+      initialValue: initialValue,
+      decoration: InputDecoration(
+        labelText: label,
+        border: const OutlineInputBorder(),
       ),
+      keyboardType: TextInputType.number,
+      validator: (value) =>
+      value == null || value.isEmpty ? 'Champ requis' : null,
+      onChanged: onChanged,
     );
   }
 }
