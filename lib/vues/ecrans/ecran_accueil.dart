@@ -128,8 +128,9 @@ class _EcranAccueilState extends State<EcranAccueil> {
   }
 
   Widget _buildCartesCommandes(DonneesCiterne donnees, ControleurAccueil controleur) {
-    final consommation = (donnees.capacite * 1000).toInt(); // litres
-    final revenu = (donnees.capacite * 50).toStringAsFixed(2); // FC
+    // 🔸 plus besoin de calculer à partir de la capacité
+    final consommationAffichee = "${donnees.consommation.toStringAsFixed(0)} L";
+    final revenuAffiche = "${donnees.revenu.toStringAsFixed(2)} Fc";
 
     return GridView.count(
       crossAxisCount: 2,
@@ -154,12 +155,12 @@ class _EcranAccueilState extends State<EcranAccueil> {
         _carteStatique(
           titre: "Consommation",
           icone: Icons.local_drink,
-          valeur: "$consommation L",
+          valeur: consommationAffichee,
         ),
         _carteStatique(
           titre: "Revenu",
           icone: Icons.attach_money,
-          valeur: "$revenu Fc",
+          valeur: revenuAffiche,
         ),
       ],
     );

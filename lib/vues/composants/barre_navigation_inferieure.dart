@@ -1,38 +1,39 @@
+// =============================
+// composants/barre_navigation_inferieure.dart
+// =============================
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../gestion_routes.dart';
 import '../../utils/utils_affichage.dart';
-import '../../services/service_etat_eau.dart'; // ✅ on utilise le service qui contient les données à jour
+import '../../services/service_etat_eau.dart';
+import '../../controleurs/controleur_alertes.dart'; // 🔥
 
 class BarreNavigationInferieure extends StatelessWidget {
   final int indexActif;
+  const BarreNavigationInferieure({Key? key, required this.indexActif}) : super(key: key);
 
-  const BarreNavigationInferieure({
-    Key? key,
-    required this.indexActif,
-  }) : super(key: key);
-
-  void _naviguer(int index, BuildContext context) {
+  void _naviguer(int index, BuildContext ctx) {
     switch (index) {
       case 0:
-        if (ModalRoute.of(context)?.settings.name != GestionRoutes.accueil) {
-          Navigator.pushReplacementNamed(context, GestionRoutes.accueil);
+        if (ModalRoute.of(ctx)?.settings.name != GestionRoutes.accueil) {
+          Navigator.pushReplacementNamed(ctx, GestionRoutes.accueil);
         }
         break;
       case 1:
-        if (ModalRoute.of(context)?.settings.name != GestionRoutes.parametres) {
-          Navigator.pushReplacementNamed(context, GestionRoutes.parametres);
+        if (ModalRoute.of(ctx)?.settings.name != GestionRoutes.parametres) {
+          Navigator.pushReplacementNamed(ctx, GestionRoutes.parametres);
         }
         break;
       case 2:
-        if (ModalRoute.of(context)?.settings.name != GestionRoutes.historique) {
-          Navigator.pushReplacementNamed(context, GestionRoutes.historique);
+        if (ModalRoute.of(ctx)?.settings.name != GestionRoutes.historique) {
+          Navigator.pushReplacementNamed(ctx, GestionRoutes.historique);
         }
         break;
       case 3:
-        if (ModalRoute.of(context)?.settings.name != GestionRoutes.alertes) {
-          Navigator.pushReplacementNamed(context, GestionRoutes.alertes);
+        if (ModalRoute.of(ctx)?.settings.name != GestionRoutes.alertes) {
+          Navigator.pushReplacementNamed(ctx, GestionRoutes.alertes);
         }
         break;
     }
@@ -40,33 +41,43 @@ class BarreNavigationInferieure extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<ServiceEtatEau>(
-      builder: (context, etatEau, _) {
-        final pourcentageEau = etatEau.donnees?.pourcentageEau ?? 0.0;
+    return Consumer2<ServiceEtatEau, ControleurAlertes>(
+      builder: (context, etatEau, ctlAlertes, _) {
+        final pourcentage = etatEau.donnees?.pourcentageEau ?? 0.0;
+        final nbNonLues = ctlAlertes.nombreNonLues;
 
         return BottomNavigationBar(
           currentIndex: indexActif,
-          onTap: (index) => _naviguer(index, context),
+          onTap: (i) => _naviguer(i, context),
           type: BottomNavigationBarType.fixed,
           backgroundColor: Colors.white,
-          selectedItemColor: getCouleurPourcentage(pourcentageEau),
+          selectedItemColor: getCouleurPourcentage(pourcentage),
           unselectedItemColor: Colors.black45,
           elevation: 10,
-          items: const [
+          items: [
+            const BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Accueil'),
+            const BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Paramètres'),
+            const BottomNavigationBarItem(icon: Icon(Icons.show_chart), label: 'Historique'),
             BottomNavigationBarItem(
-              icon: Icon(Icons.home),
-              label: 'Accueil',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.settings),
-              label: 'Paramètres',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.show_chart),
-              label: 'Historique',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.warning),
+              icon: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  const Icon(Icons.warning),
+                  if (nbNonLues > 0)
+                    Positioned(
+                      right: -6,
+                      top: -6,
+                      child: Container(
+                        padding: const EdgeInsets.all(3),
+                        decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle),
+                        constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
+                        child: Text('$nbNonLues',
+                            style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                            textAlign: TextAlign.center),
+                      ),
+                    ),
+                ],
+              ),
               label: 'Alertes',
             ),
           ],
