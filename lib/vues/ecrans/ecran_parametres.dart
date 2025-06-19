@@ -110,7 +110,7 @@ class _EcranParametresState extends State<EcranParametres> {
                             try {
                               await ctl.mettreAJour(p);
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Paramètres mis à jour ✅',
+                                const SnackBar(content: Text('Paramètres mis à jour',
                                   style: TextStyle(color: Colors.green, fontSize: 16, fontWeight: FontWeight.bold),
                                 )),
                               );

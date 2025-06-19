@@ -43,7 +43,7 @@ class _EcranAlertesState extends State<EcranAlertes> {
         }
 
         return Scaffold(
-          appBar: const BarreSuperieure(titre: 'Gestion des Alertes'),
+          appBar: const BarreSuperieure(titre: 'Alertes'),
           backgroundColor: const Color(0xFFE9F0FA),
           body: Consumer<ControleurAlertes>(
             builder: (context, ctl, _) {
