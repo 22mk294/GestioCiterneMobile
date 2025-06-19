@@ -93,7 +93,7 @@ class _EcranParametresState extends State<EcranParametres> {
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton.icon(
-                          icon: const Icon(Icons.save),
+                          icon: const Icon(Icons.save, color:Colors.white),
                           label: const Text('Enregistrer les paramètres', style: TextStyle(fontSize: 16, color: Colors.white)),
                           style: ElevatedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 14),
@@ -111,15 +111,21 @@ class _EcranParametresState extends State<EcranParametres> {
                               await ctl.mettreAJour(p);
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(content: Text('Paramètres mis à jour',
-                                  style: TextStyle(color: Colors.green, fontSize: 16, fontWeight: FontWeight.bold),
-                                )),
+                                  style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+
+                                ),
+                                  backgroundColor: Colors.blue,
+                                ),
+
                               );
                             } catch (e) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(content: Text('Erreur : $e',
-                                  style: const TextStyle(color: Colors.red, fontSize: 16, fontWeight: FontWeight.bold)
+                                  style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.normal)
 
-                                )),
+                                ),
+                                  backgroundColor: Colors.red,
+                                ),
                               );
                             }
                           },
@@ -193,7 +199,7 @@ class _EcranParametresState extends State<EcranParametres> {
   Widget _infoCard() => Container(
     padding: const EdgeInsets.all(14),
     decoration: BoxDecoration(
-      color: const Color(0xFFEEF3FA),
+      color: Color(0xFFdee2e6),
       borderRadius: BorderRadius.circular(10),
     ),
     child: Row(
@@ -206,7 +212,9 @@ class _EcranParametresState extends State<EcranParametres> {
             'Les changements sont appliqués immédiatement. '
                 'Le mode automatique gère la pompe selon le niveau d’eau, '
                 'alors que le mode manuel vous laisse le contrôle complet.',
-            style: TextStyle(fontSize: 12),
+
+            style: TextStyle(fontSize: 12, color: Colors.black),
+
           ),
         ),
       ],

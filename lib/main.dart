@@ -18,7 +18,7 @@ void main() {
         ChangeNotifierProvider(create: (_) => ServiceConnectivite()),
         ChangeNotifierProvider(create: (_) => ServiceEtatEau()),
         // Note : ServiceRafraichissementDonnees n'a pas besoin de notifier
-        Provider(create: (_) => ServiceRafraichissementDonnees()),
+        //Provider(create: (_) => ServiceRafraichissementDonnees()),
         ChangeNotifierProvider(create: (_) => ControleurAlertes()),
       ],
       child: const MyApp(),

@@ -128,7 +128,7 @@ class _EcranAccueilState extends State<EcranAccueil> {
   }
 
   Widget _buildCartesCommandes(DonneesCiterne donnees, ControleurAccueil controleur) {
-    // 🔸 plus besoin de calculer à partir de la capacité
+    // plus besoin de calculer à partir de la capacité
     final consommationAffichee = "${donnees.consommation.toStringAsFixed(0)} L";
     final revenuAffiche = "${donnees.revenu.toStringAsFixed(2)} Fc";
 
@@ -209,7 +209,7 @@ class _EcranAccueilState extends State<EcranAccueil> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icone, size: 22, color: Colors.indigo),
+            Icon(icone, size: 22, color: Colors.blue),
             const SizedBox(height: 4),
             Text(titre, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
             const SizedBox(height: 4),
