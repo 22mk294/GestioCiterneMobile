@@ -1,4 +1,3 @@
-
 # Dossier `lib/` – GestioCiterneMobile
 
 Ce dossier contient la logique principale de l’application mobile GestioCiterneMobile, développée en Dart/Flutter. Il regroupe l’ensemble du code source nécessaire au fonctionnement de l’application, de la gestion des interfaces à la manipulation des données.
@@ -200,3 +199,134 @@ flutter run
 Merci de respecter la structure existante pour toute contribution ou modification. Pense à documenter tes ajouts et à maintenir la cohérence du code.
 
 ---
+
+# GestioCiterneMobile
+
+## Description du Projet
+
+GestioCiterneMobile est une application mobile Flutter pour la gestion et le monitoring de citernes d'eau. L'application permet de surveiller en temps réel le niveau d'eau, les consommations, les revenus et de gérer les alertes liées aux citernes.
+
+## Architecture du Projet
+
+L'application suit une architecture MVVM (Model-View-ViewModel) avec une séparation claire des responsabilités :
+
+### Structure des Dossiers
+
+```
+lib/
+├── assets/              # Ressources statiques (images, icônes)
+├── controleurs/         # Logique métier et état de l'application
+├── gestion_routes.dart  # Gestion de la navigation
+├── main.dart           # Point d'entrée de l'application
+├── modeles/            # Classes de données
+├── services/           # Services et API
+├── utils/              # Fonctions utilitaires
+└── vues/              # Interface utilisateur
+    ├── composants/    # Composants réutilisables
+    └── ecrans/        # Écrans de l'application
+```
+
+### Composants Principaux
+
+#### Vues
+- **EcranAccueil** : Page principale montrant le niveau d'eau et les données principales
+- **EcranAlertes** : Gestion des alertes liées aux citernes
+- **EcranConnexion** : Authentification des utilisateurs
+- **EcranControle** : Contrôle des équipements (pompe, vanne)
+- **EcranHistorique** : Historique des données
+- **EcranParametres** : Configuration de l'application
+- **EcranProfil** : Gestion du profil utilisateur
+
+#### Modèles
+- **DonneesCiterne** : Modèle principal contenant :
+  - Niveau d'eau en %
+  - État de la pompe
+  - État de la vanne
+  - État du buzzer
+  - Capacité de la citerne
+  - Type d'alerte
+  - Consommation d'eau
+  - Revenus générés
+
+#### Services
+- **ServiceConnectivite** : Gestion de la connexion réseau
+- **ServiceEtatEau** : Gestion de l'état des citernes
+- **ServiceRafraichissement** : Mise à jour périodique des données
+- **ServiceESP32_HTTP** : Communication avec les capteurs ESP32
+- **ServiceAuth_HTTP** : Authentification utilisateur
+- **ServiceAlertes_HTTP** : Gestion des alertes
+- **ServiceHistorique** : Historique des données
+- **ServiceParametre** : Paramètres de l'application
+- **ServiceSession** : Gestion des sessions utilisateur
+
+### Fonctionnalités Principales
+
+1. **Monitoring en Temps Réel**
+   - Suivi du niveau d'eau
+   - Affichage des consommations
+   - Calcul des revenus
+   - État des équipements (pompe, vanne, buzzer)
+
+2. **Gestion des Alertes**
+   - Détection automatique des problèmes
+   - Notifications en cas de seuils dépassés
+   - Historique des alertes
+
+3. **Contrôle des Équipements**
+   - Activation/désactivation de la pompe
+   - Contrôle des vannes
+   - Gestion des alertes sonores
+
+4. **Historique et Statistiques**
+   - Historique des niveaux d'eau
+   - Statistiques de consommation
+   - Évolution des revenus
+
+5. **Paramètres et Configuration**
+   - Configuration des seuils d'alerte
+   - Paramètres de rafraîchissement
+   - Configuration utilisateur
+
+### Architecture Technique
+
+- **Framework** : Flutter
+- **État de l'Application** : Provider
+- **Navigation** : Routes nommées
+- **API** : Communication HTTP avec les capteurs ESP32
+- **Sécurité** : Authentification utilisateur
+- **Responsive Design** : Interface adaptative
+
+### Prerequisites
+
+- Flutter SDK
+- Dart
+- IDE compatible (VSCode, Android Studio, IntelliJ IDEA)
+
+### Installation
+
+1. Cloner le repository
+2. Installer les dépendances :
+   ```
+   flutter pub get
+   ```
+3. Lancer l'application :
+   ```
+   flutter run
+   ```
+
+## Contributing
+
+Pour contribuer au projet :
+1. Faites un fork du repository
+2. Créez votre branche de fonctionnalité (`git checkout -b feature/amazing-feature`)
+3. Commit vos changements (`git commit -m 'Add some amazing feature'`)
+4. Push vers la branche (`git push origin feature/amazing-feature`)
+5. Ouvrez une Pull Request
+
+## License
+
+Ce projet est sous licence MIT - voir le fichier LICENSE pour plus de détails.
+
+## Contact
+
+Pour toute question ou problème, veuillez ouvrir une issue sur le repository.

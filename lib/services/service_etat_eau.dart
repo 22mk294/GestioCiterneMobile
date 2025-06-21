@@ -4,7 +4,7 @@ import '../modeles/modele_donnees.dart';
 
 class ServiceEtatEau with ChangeNotifier {
   DonneesCiterne? _donnees;
-  int _frequence = 10; // Valeur par défaut en secondes
+  int _frequence = 5; // Valeur par défaut en secondes
 
   DonneesCiterne? get donnees => _donnees;
   double get pourcentageEau => _donnees?.pourcentageEau ?? 0.0;

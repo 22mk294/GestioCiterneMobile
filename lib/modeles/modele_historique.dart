@@ -1,7 +1,7 @@
 class EntreeHistorique {
   final DateTime date;
-  final int consommation; // en L
-  final double revenu;    // en FC
+  final double consommation; // en litres
+  final double revenu;       // en FC
 
   EntreeHistorique({
     required this.date,
@@ -12,7 +12,7 @@ class EntreeHistorique {
   factory EntreeHistorique.fromJson(Map<String, dynamic> json) {
     return EntreeHistorique(
       date: DateTime.parse(json['date']),
-      consommation: int.parse(json['water_usage'].toString()),
+      consommation: double.parse(json['water_usage'].toString()),
       revenu: double.parse(json['revenue'].toString()),
     );
   }

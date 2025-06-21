@@ -10,6 +10,7 @@ import '../composants/barre_superieure.dart';
 import '../composants/cercle_eau.dart';
 import '../../utils/utils_affichage.dart';
 import '../../modeles/modele_donnees.dart';
+import '../../controleurs/controleur_parametres.dart';
 
 class EcranAccueil extends StatefulWidget {
   const EcranAccueil({super.key});

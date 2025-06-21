@@ -1,5 +1,5 @@
 // =============================
-// ecrans/ecran_historique.dart  — export CSV + PDF
+// ecrans/ecran_historique.dart — export CSV + PDF
 // =============================
 
 import 'dart:convert';
@@ -114,22 +114,25 @@ class _CorpsHistorique extends StatelessWidget {
           if (ctl.chargement) {
             return const Center(child: CircularProgressIndicator());
           }
-          if (ctl.historique.isEmpty) {
-            return const Center(child: Text('Aucune donnée disponible.'));
-          }
 
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               SingleChildScrollView(scrollDirection: Axis.horizontal, child: _Filtres(ctl: ctl)),
               const SizedBox(height: 12),
-              _Graphique(consommations: ctl.historique),
-              const SizedBox(height: 18),
-              const Text('Détails par jour', style: TextStyle(fontWeight: FontWeight.bold)),
-              const SizedBox(height: 4),
-              Expanded(child: _ListeDetaillee(ctl: ctl)),
-              const SizedBox(height: 8),
-              _CartesStats(ctl: ctl),
+              if (ctl.historique.isEmpty)
+                const Expanded(
+                  child: Center(child: Text('Aucune donnée disponible.')),
+                )
+              else ...[
+                _Graphique(consommations: ctl.historique),
+                const SizedBox(height: 18),
+                const Text('Détails par jour', style: TextStyle(fontWeight: FontWeight.bold)),
+                const SizedBox(height: 4),
+                Expanded(child: _ListeDetaillee(ctl: ctl)),
+                const SizedBox(height: 8),
+                _CartesStats(ctl: ctl),
+              ],
             ],
           );
         },
@@ -175,32 +178,42 @@ class _Graphique extends StatelessWidget {
     final bars = <BarChartGroupData>[];
     for (int i = 0; i < consommations.length; i++) {
       bars.add(
-        BarChartGroupData(x: i, barRods: [BarChartRodData(toY: consommations[i].consommation.toDouble(), width: 12, color: Colors.blue)]),
+        BarChartGroupData(x: i, barRods: [
+          BarChartRodData(toY: consommations[i].consommation.toDouble(), width: 12, color: Colors.blue)
+        ]),
       );
     }
 
     return Container(
       height: 200,
       padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(10), boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4)]),
-      child: BarChart(BarChartData(
-        barGroups: bars,
-        titlesData: FlTitlesData(
-          bottomTitles: AxisTitles(
-            sideTitles: SideTitles(
-              showTitles: true,
-              getTitlesWidget: (v, _) {
-                if (v.toInt() >= consommations.length) return const SizedBox.shrink();
-                final d = consommations[v.toInt()].date;
-                return Text('${d.day}/${d.month}', style: const TextStyle(fontSize: 9));
-              },
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10),
+        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4)],
+      ),
+      child: BarChart(
+        BarChartData(
+          barGroups: bars,
+          titlesData: FlTitlesData(
+            bottomTitles: AxisTitles(
+              sideTitles: SideTitles(
+                showTitles: true,
+                getTitlesWidget: (v, _) {
+                  if (v.toInt() >= consommations.length) return const SizedBox.shrink();
+                  final d = consommations[v.toInt()].date;
+                  return Text('${d.day}/${d.month}', style: const TextStyle(fontSize: 9));
+                },
+              ),
+            ),
+            leftTitles: AxisTitles(
+              sideTitles: SideTitles(showTitles: true, reservedSize: 28),
             ),
           ),
-          leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: true, reservedSize: 28)),
+          gridData: FlGridData(show: false),
+          borderData: FlBorderData(show: false),
         ),
-        gridData: FlGridData(show: false),
-        borderData: FlBorderData(show: false),
-      )),
+      ),
     );
   }
 }
@@ -216,15 +229,27 @@ class _ListeDetaillee extends StatelessWidget {
       separatorBuilder: (_, __) => const Divider(),
       itemBuilder: (context, i) {
         final e = ctl.historique[i];
-        final d = '${e.date.day.toString().padLeft(2, '0')}/${e.date.month.toString().padLeft(2, '0')}/${e.date.year}';
+        final d =
+            '${e.date.day.toString().padLeft(2, '0')}/${e.date.month.toString().padLeft(2, '0')}/${e.date.year}';
         final varPct = ctl.variationPour(i);
-        final varText = varPct.isNaN ? '' : ' (${varPct >= 0 ? '+' : ''}${varPct.toStringAsFixed(1)}%)';
+        final varText = varPct.isNaN
+            ? ''
+            : ' (${varPct >= 0 ? '+' : ''}${varPct.toStringAsFixed(1)}%)';
         return Row(
           children: [
             Expanded(flex: 2, child: Text(d, style: const TextStyle(fontSize: 13))),
             Expanded(flex: 2, child: Text('${e.consommation} L', style: const TextStyle(fontSize: 13))),
             Expanded(flex: 2, child: Text('${e.revenu.toStringAsFixed(0)} FC', style: const TextStyle(fontSize: 13))),
-            Expanded(flex: 2, child: Text(varText, style: TextStyle(fontSize: 12, color: varPct.isNaN ? Colors.grey : (varPct >= 0 ? Colors.green : Colors.red)))),
+            Expanded(
+              flex: 2,
+              child: Text(
+                varText,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: varPct.isNaN ? Colors.grey : (varPct >= 0 ? Colors.green : Colors.red),
+                ),
+              ),
+            ),
           ],
         );
       },

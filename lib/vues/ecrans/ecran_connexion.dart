@@ -107,7 +107,7 @@ class _EcranConnexionState extends State<EcranConnexion> {
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton.icon(
-                        icon: const Icon(Icons.login),
+                        icon: const Icon(Icons.login, color:Colors.white),
                         label: _isLoading
                             ? const SizedBox(
                           width: 18,
@@ -115,7 +115,10 @@ class _EcranConnexionState extends State<EcranConnexion> {
                           child: CircularProgressIndicator(
                               strokeWidth: 2, color: Colors.white),
                         )
-                            : const Text('Se connecter'),
+                            : const Text('Se connecter',
+
+                        style: TextStyle(fontSize: 16, color:Colors.white
+                        )),
                         onPressed: _isLoading ? null : _connecter,
                         style: ElevatedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 14),
