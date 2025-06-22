@@ -26,7 +26,7 @@ class BarreSuperieure extends StatelessWidget implements PreferredSizeWidget {
       title: Text(titre),
       centerTitle: true,
       actions: actions,
-      backgroundColor:  Color(0xFFD3ECFF),
+      backgroundColor:  Color(0xFFCDE5FE),
     );
   }
 

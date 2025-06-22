@@ -82,12 +82,7 @@ class ControleurAccueil with ChangeNotifier {
 
     await chargerDonnees(context);
   }
-  /// Active ou désactive l'alarme (buzzer)
-  Future<void> reglerBuzzer(BuildContext context, bool activer) async {
-    final valeur = activer ? "ON" : "OFF";
-    await _serviceHttp.envoyerCommande("buzzer", valeur);
-    await chargerDonnees(context);
-  }
+
 
 
 }

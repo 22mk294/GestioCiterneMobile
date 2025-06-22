@@ -4,9 +4,11 @@ import 'package:provider/provider.dart';
 import 'controleurs/controleur_accueil.dart';
 import 'controleurs/controleur_alertes.dart';
 import 'controleurs/controleur_parametres.dart';
+import 'controleurs/controleur_historique.dart'; // 👈 nouveau
 import 'services/service_connectivite.dart';
 import 'services/service_etat_eau.dart';
 import 'services/service_rafraichissement.dart';
+import 'services/service_rafraichissement_historique.dart'; // 👈 nouveau
 import 'gestion_routes.dart';
 
 void main() {
@@ -17,9 +19,9 @@ void main() {
         ChangeNotifierProvider(create: (_) => ControleurParametres()),
         ChangeNotifierProvider(create: (_) => ServiceConnectivite()),
         ChangeNotifierProvider(create: (_) => ServiceEtatEau()),
-        // Note : ServiceRafraichissementDonnees n'a pas besoin de notifier
-        Provider(create: (_) => ServiceRafraichissementDonnees()),
         ChangeNotifierProvider(create: (_) => ControleurAlertes()),
+        ChangeNotifierProvider(create: (_) => ControleurHistorique()), // 👈 injection globale
+        Provider(create: (_) => ServiceRafraichissementDonnees()),
       ],
       child: const MyApp(),
     ),
@@ -40,14 +42,18 @@ class _MyAppState extends State<MyApp> {
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    // Démarrer le service de rafraîchissement une seule fois si connecté
     if (!_initialise) {
       final connectivite = Provider.of<ServiceConnectivite>(context, listen: false);
+
       if (connectivite.estConnecte) {
         final serviceRafraichissement =
         Provider.of<ServiceRafraichissementDonnees>(context, listen: false);
         serviceRafraichissement.demarrer(context);
+
+        // 👇 démarre le service historique global
+        ServiceRafraichissementHistorique.instance.demarrer(context, intervalle: 10);
       }
+
       _initialise = true;
     }
   }

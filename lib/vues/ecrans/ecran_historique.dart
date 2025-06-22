@@ -1,65 +1,50 @@
-// =============================
-// ecrans/ecran_historique.dart — export CSV + PDF
-// =============================
-
-import 'dart:convert';
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:pdf/widgets.dart' as pw;
-import 'package:printing/printing.dart';
 
+import '../../services/export_service.dart';
 import '../../services/service_connectivite.dart';
-import '../composants/barre_navigation_inferieure.dart';
-import '../composants/barre_superieure.dart';
+import '../../services/service_rafraichissement_historique.dart';
 import '../../controleurs/controleur_historique.dart';
 import '../../modeles/modele_historique.dart';
+import '../composants/barre_navigation_inferieure.dart';
+import '../composants/barre_superieure.dart';
 
-class EcranHistorique extends StatelessWidget {
+class EcranHistorique extends StatefulWidget {
   const EcranHistorique({super.key});
 
-  Future<File> _writeTemp(String name, String content) async {
-    try {
-      final dir = await getTemporaryDirectory();
-      return File('${dir.path}/$name').writeAsString(content, encoding: utf8);
-    } catch (_) {
-      final dir = Directory.systemTemp;
-      return File('${dir.path}/$name').writeAsString(content, encoding: utf8);
-    }
-  }
+  @override
+  State<EcranHistorique> createState() => _EcranHistoriqueState();
+}
 
-  Future<void> _exportCSV(BuildContext ctx, ControleurHistorique ctl) async {
-    final csv = ctl.generateCSV();
-    final file = await _writeTemp('historique_${DateTime.now().millisecondsSinceEpoch}.csv', csv);
+class _EcranHistoriqueState extends State<EcranHistorique> {
+  final exportService = ExportService();
+  final _rafraichisseur = ServiceRafraichissementHistorique();
+
+  Future<void> _export(BuildContext ctx, ControleurHistorique ctl, String format) async {
+    File file = (format == 'csv')
+        ? await exportService.generateCSV(ctl.historique)
+        : await exportService.generatePDF(ctl.historique);
     await Share.shareXFiles([XFile(file.path)], text: 'Historique de consommation');
   }
 
-  Future<void> _exportPDF(BuildContext ctx, ControleurHistorique ctl) async {
-    final doc = pw.Document();
-    doc.addPage(
-      pw.Page(
-        build: (pw.Context _) {
-          return pw.Table.fromTextArray(
-            headers: ['Date', 'Consommation (L)', 'Revenu (FC)'],
-            data: ctl.historique
-                .map((e) => [
-              '${e.date.day}/${e.date.month}/${e.date.year}',
-              e.consommation.toString(),
-              e.revenu.toStringAsFixed(0)
-            ])
-                .toList(),
-          );
-        },
-      ),
-    );
-    final bytes = await doc.save();
-    final file = await _writeTemp('historique_${DateTime.now().millisecondsSinceEpoch}.pdf', '');
-    await file.writeAsBytes(bytes, flush: true);
-    await Share.shareXFiles([XFile(file.path)], text: 'Historique de consommation');
+  @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final ctl = Provider.of<ControleurHistorique>(context, listen: false);
+      ctl.chargerHistorique(jours: 7);
+      _rafraichisseur.demarrer(context, intervalle: 10);
+    });
+  }
+
+  @override
+  void dispose() {
+    _rafraichisseur.arreter();
+    super.dispose();
   }
 
   @override
@@ -70,36 +55,32 @@ class EcranHistorique extends StatelessWidget {
           return const Center(child: Text('Pas de connexion Internet'));
         }
 
-        return ChangeNotifierProvider(
-          create: (_) => ControleurHistorique()..chargerHistorique(jours: 7),
-          child: Scaffold(
-            appBar: BarreSuperieure(
-              titre: 'Historique',
-              actions: [
-                Consumer<ControleurHistorique>(
-                  builder: (ctx, ctl, __) => PopupMenuButton<String>(
-                    icon: const Icon(Icons.share),
-                    onSelected: (val) async {
-                      if (val == 'csv') await _exportCSV(ctx, ctl);
-                      if (val == 'pdf') await _exportPDF(ctx, ctl);
-                    },
-                    itemBuilder: (_) => const [
-                      PopupMenuItem(value: 'csv', child: Text('Exporter CSV')),
-                      PopupMenuItem(value: 'pdf', child: Text('Exporter PDF')),
-                    ],
-                  ),
+        return Scaffold(
+          appBar: BarreSuperieure(
+            titre: 'Historique',
+            actions: [
+              Consumer<ControleurHistorique>(
+                builder: (ctx, ctl, __) => PopupMenuButton<String>(
+                  icon: const Icon(Icons.share),
+                  onSelected: (val) async => _export(ctx, ctl, val),
+                  itemBuilder: (_) => const [
+                    PopupMenuItem(value: 'csv', child: Text('Exporter CSV')),
+                    PopupMenuItem(value: 'pdf', child: Text('Exporter PDF')),
+                  ],
                 ),
-              ],
-            ),
-            backgroundColor: const Color(0xFFF4F8FC),
-            body: const _CorpsHistorique(),
-            bottomNavigationBar: const BarreNavigationInferieure(indexActif: 2),
+              ),
+            ],
           ),
+          backgroundColor: const Color(0xFFCDE5FE),
+          body: const _CorpsHistorique(),
+          bottomNavigationBar: const BarreNavigationInferieure(indexActif: 2),
         );
       },
     );
   }
 }
+
+
 
 /* ================= CORPS PRINCIPAL ================= */
 class _CorpsHistorique extends StatelessWidget {
@@ -156,7 +137,7 @@ class _Filtres extends StatelessWidget {
           onPressed: () => ctl.chargerHistorique(jours: j),
           style: ElevatedButton.styleFrom(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            backgroundColor: actif ? Colors.blue : Colors.grey[300],
+            backgroundColor: actif ? Colors.blue : Colors.white,
             foregroundColor: actif ? Colors.white : Colors.black,
             textStyle: const TextStyle(fontSize: 12),
           ),
@@ -190,7 +171,7 @@ class _Graphique extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(10),
-        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4)],
+        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 10)],
       ),
       child: BarChart(
         BarChartData(

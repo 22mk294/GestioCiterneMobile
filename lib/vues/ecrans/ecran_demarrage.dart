@@ -39,7 +39,7 @@ class _EcranDemarrageState extends State<EcranDemarrage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFCDE5FE),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

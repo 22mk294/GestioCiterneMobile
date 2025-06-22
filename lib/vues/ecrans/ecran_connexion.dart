@@ -54,7 +54,7 @@ class _EcranConnexionState extends State<EcranConnexion> {
     final h = MediaQuery.of(context).size.height;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFE9F0FA),
+      backgroundColor: const Color(0xFFCDE5FE),
       body: Center(
         child: SingleChildScrollView(
           child: Column(

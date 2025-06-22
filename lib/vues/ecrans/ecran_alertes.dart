@@ -44,7 +44,7 @@ class _EcranAlertesState extends State<EcranAlertes> {
 
         return Scaffold(
           appBar: const BarreSuperieure(titre: 'Alertes'),
-          backgroundColor: const Color(0xFFE9F0FA),
+          backgroundColor: const Color(0xFFE3EDF7),
           body: Consumer<ControleurAlertes>(
             builder: (context, ctl, _) {
               if (ctl.chargement) return const Center(child: CircularProgressIndicator());
@@ -53,7 +53,7 @@ class _EcranAlertesState extends State<EcranAlertes> {
               final resume = Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  _resumeCard(Icons.warning_amber_rounded, Colors.redAccent, ctl.nbCritiques, 'Alertes\ncritiques'),
+                  _resumeCard(Icons.warning, Colors.redAccent, ctl.nbCritiques, 'Alertes\ncritiques'),
                   _resumeCard(Icons.error_outline, Colors.orange, ctl.nbImportantes, 'Alertes\nimportantes'),
                   Stack(
                     alignment: Alignment.topRight,

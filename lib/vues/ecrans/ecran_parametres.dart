@@ -1,8 +1,6 @@
-// =============================
-// vues/ecrans/ecran_parametres.dart
-// =============================
-
+// lib/vues/ecrans/ecran_parametres.dart
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../../controleurs/controleur_parametres.dart';
@@ -30,7 +28,8 @@ class _EcranParametresState extends State<EcranParametres> {
   @override
   void initState() {
     super.initState();
-    Provider.of<ControleurParametres>(context, listen: false).chargerParametres();
+    Provider.of<ControleurParametres>(context, listen: false)
+        .chargerParametres();
   }
 
   @override
@@ -40,7 +39,8 @@ class _EcranParametresState extends State<EcranParametres> {
         if (!net.estConnecte) return EcranErreurConnexion();
         final param = ctl.parametres;
         if (param == null) {
-          return const Scaffold(body: Center(child: CircularProgressIndicator()));
+          return const Scaffold(
+              body: Center(child: CircularProgressIndicator()));
         }
 
         if (!_init) {
@@ -60,79 +60,82 @@ class _EcranParametresState extends State<EcranParametres> {
               key: _formKey,
               child: Column(
                 children: [
-                  _sectionCard(
-                    children: [
-                      _titleWithIcon(Icons.settings_remote, 'Mode Pompe'),
-                      const SizedBox(height: 6),
-                      _buildDropdownPumpMode(),
-                      const SizedBox(height: 14),
-                      _titleWithIcon(Icons.warning, 'Seuil d’alerte (%)'),
-                      const SizedBox(height: 6),
-                      _buildTextField(
-                        initialValue: (_criticalLevel! * 100).toStringAsFixed(0),
-                        hint: 'Ex. 55',
-                        onChanged: (v) => _criticalLevel = double.tryParse(v)! / 100,
-                      ),
-                      const SizedBox(height: 14),
-                      _titleWithIcon(Icons.monetization_on, 'Prix pour 20 L (FC)'),
-                      const SizedBox(height: 6),
-                      _buildTextField(
-                        initialValue: '$_pricePer20L',
-                        hint: 'Ex. 500',
-                        onChanged: (v) => _pricePer20L = int.tryParse(v)!,
-                      ),
-                      const SizedBox(height: 14),
-                      _titleWithIcon(Icons.refresh, 'Taux de rafraîchissement (s)'),
-                      const SizedBox(height: 6),
-                      _buildTextField(
-                        initialValue: '$_refreshRate',
-                        hint: 'Ex. 2',
-                        onChanged: (v) => _refreshRate = int.tryParse(v)!,
-                      ),
-                      const SizedBox(height: 22),
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton.icon(
-                          icon: const Icon(Icons.save, color:Colors.white),
-                          label: const Text('Enregistrer les paramètres', style: TextStyle(fontSize: 16, color: Colors.white)),
-                          style: ElevatedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                            backgroundColor: const Color(0xFF0076FF),
-                          ),
-                          onPressed: () async {
-                            if (!_formKey.currentState!.validate()) return;
-                            final p = ParametresCiterne(
-                              pumpMode: _pumpMode!,
-                              criticalLevel: _criticalLevel!,
-                              refreshRate: _refreshRate!,
-                              pricePer20L: _pricePer20L!,
-                            );
-                            try {
-                              await ctl.mettreAJour(p);
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Paramètres mis à jour',
-                                  style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
-
-                                ),
-                                  backgroundColor: Colors.blue,
-                                ),
-
-                              );
-                            } catch (e) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text('Erreur : $e',
-                                  style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.normal)
-
-                                ),
-                                  backgroundColor: Colors.red,
-                                ),
-                              );
-                            }
-                          },
+                  _sectionCard(children: [
+                    _titleWithIcon(Icons.settings_remote, 'Mode Pompe'),
+                    const SizedBox(height: 6),
+                    _buildDropdownPumpMode(),
+                    const SizedBox(height: 14),
+                    _titleWithIcon(Icons.warning, 'Seuil d’alerte (%)'),
+                    const SizedBox(height: 6),
+                    _buildCriticalLevelField(),
+                    const SizedBox(height: 14),
+                    _titleWithIcon(Icons.monetization_on, 'Prix pour 20 L (FC)'),
+                    const SizedBox(height: 6),
+                    _buildNumberField(
+                      initialValue: '$_pricePer20L',
+                      hint: 'Ex. 500',
+                      onChanged: (v) => _pricePer20L = int.tryParse(v) ?? 0,
+                    ),
+                    const SizedBox(height: 14),
+                    _titleWithIcon(Icons.refresh, 'Taux de rafraîchissement (s)'),
+                    const SizedBox(height: 6),
+                    _buildNumberField(
+                      initialValue: '$_refreshRate',
+                      hint: 'Ex. 2',
+                      onChanged: (v) => _refreshRate = int.tryParse(v) ?? 0,
+                    ),
+                    const SizedBox(height: 22),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        icon: const Icon(Icons.save, color: Colors.white),
+                        label: const Text(
+                          'Enregistrer les paramètres',
+                          style: TextStyle(
+                              fontSize: 16, color: Colors.white),
                         ),
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          backgroundColor: const Color(0xFF0076FF),
+                        ),
+                        onPressed: () async {
+                          if (!_formKey.currentState!.validate()) return;
+                          final p = ParametresCiterne(
+                            pumpMode: _pumpMode!,
+                            criticalLevel: _criticalLevel!,
+                            refreshRate: _refreshRate!,
+                            pricePer20L: _pricePer20L!,
+                          );
+                          try {
+                            await ctl.mettreAJour(p);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                  'Paramètres mis à jour',
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                backgroundColor: Colors.blue,
+                              ),
+                            );
+                          } catch (e) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  'Erreur : $e',
+                                  style: const TextStyle(
+                                      color: Colors.white, fontSize: 15),
+                                ),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                          }
+                        },
                       ),
-                    ],
-                  ),
+                    ),
+                  ]),
                   const SizedBox(height: 16),
                   _infoCard(),
                 ],
@@ -146,6 +149,7 @@ class _EcranParametresState extends State<EcranParametres> {
   }
 
   /* ---------- Widgets helpers ---------- */
+
   Widget _sectionCard({required List<Widget> children}) => Container(
     padding: const EdgeInsets.all(16),
     decoration: BoxDecoration(
@@ -172,19 +176,39 @@ class _EcranParametresState extends State<EcranParametres> {
       DropdownMenuItem(value: 'manual', child: Text('Manuel')),
     ],
     onChanged: (v) => setState(() => _pumpMode = v),
-    validator: (v) => (v == null) ? 'Choisir un mode' : null,
+    validator: (v) => v == null ? 'Choisir un mode' : null,
   );
 
-  Widget _buildTextField({
+  /// Champ limité à 2 chiffres (1–99) pour le pourcentage
+  Widget _buildCriticalLevelField() => TextFormField(
+    initialValue: (_criticalLevel! * 100).toStringAsFixed(0),
+    keyboardType: TextInputType.number,
+    inputFormatters: [
+      FilteringTextInputFormatter.digitsOnly,
+      LengthLimitingTextInputFormatter(2),
+    ],
+    decoration: _inputDeco(hintText: 'Ex. 55'),
+    onChanged: (v) =>
+    _criticalLevel = (double.tryParse(v) ?? 0) / 100, // remet sur 0–1
+    validator: (v) {
+      if (v == null || v.isEmpty) return 'Champ requis';
+      final n = int.tryParse(v);
+      if (n == null || n < 1 || n > 99) return '1 – 99 %';
+      return null;
+    },
+  );
+
+  Widget _buildNumberField({
     required String initialValue,
     required String hint,
     required Function(String) onChanged,
   }) =>
       TextFormField(
         initialValue: initialValue,
-        onChanged: onChanged,
         keyboardType: TextInputType.number,
+        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
         decoration: _inputDeco(hintText: hint),
+        onChanged: onChanged,
         validator: (v) => (v == null || v.isEmpty) ? 'Champ requis' : null,
       );
 
@@ -192,14 +216,15 @@ class _EcranParametresState extends State<EcranParametres> {
     hintText: hintText,
     filled: true,
     fillColor: const Color(0xFFF8FBFF),
-    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+    contentPadding:
+    const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
     border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
   );
 
   Widget _infoCard() => Container(
     padding: const EdgeInsets.all(14),
     decoration: BoxDecoration(
-      color: Color(0xFFdee2e6),
+      color: const Color(0xFFCDE5FE),
       borderRadius: BorderRadius.circular(10),
     ),
     child: Row(
@@ -212,9 +237,7 @@ class _EcranParametresState extends State<EcranParametres> {
             'Les changements sont appliqués immédiatement. '
                 'Le mode automatique gère la pompe selon le niveau d’eau, '
                 'alors que le mode manuel vous laisse le contrôle complet.',
-
-            style: TextStyle(fontSize: 12, color: Colors.black),
-
+            style: TextStyle(fontSize: 12),
           ),
         ),
       ],

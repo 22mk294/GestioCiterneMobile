@@ -10,7 +10,6 @@ import '../composants/barre_superieure.dart';
 import '../composants/cercle_eau.dart';
 import '../../utils/utils_affichage.dart';
 import '../../modeles/modele_donnees.dart';
-import '../../controleurs/controleur_parametres.dart';
 
 class EcranAccueil extends StatefulWidget {
   const EcranAccueil({super.key});
@@ -76,10 +75,10 @@ class _EcranAccueilState extends State<EcranAccueil> {
                 _buildCercleEau(pourcentage, niveau, capacite),
                 const SizedBox(height: 10),
                 const Align(
-                  alignment: Alignment.centerLeft,
+                  alignment: Alignment.center,
                   child: Text(
-                    "Contrôles du système",
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    "Contrôle de la citerne",
+                    style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold, color: Colors.blueGrey),
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -113,7 +112,7 @@ class _EcranAccueilState extends State<EcranAccueil> {
               ),
               const SizedBox(height: 4),
               Text(
-                '${niveau.toStringAsFixed(1)} L / ${capacite.toStringAsFixed(1)} L',
+                '${niveau.toStringAsFixed(1)} L / ${capacite.toStringAsFixed(10)} L',
                 style: const TextStyle(fontSize: 12, color: Colors.blue),
               ),
               const SizedBox(height: 4),
@@ -181,14 +180,14 @@ class _EcranAccueilState extends State<EcranAccueil> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icone, size: 24, color: actif ? Colors.green : Colors.red),
+            Icon(icone, size: 24, color: actif ? Colors.blue : Colors.red),
             const SizedBox(height: 4),
             Text(titre, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
             const SizedBox(height: 4),
             Switch(
               value: actif,
               onChanged: onChanged,
-              activeColor: Colors.green,
+              activeColor: Colors.blue,
               materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
           ],
@@ -214,7 +213,7 @@ class _EcranAccueilState extends State<EcranAccueil> {
             const SizedBox(height: 4),
             Text(titre, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
             const SizedBox(height: 4),
-            Text(valeur, style: const TextStyle(fontSize: 13, color: Colors.black87), textAlign: TextAlign.center),
+            Text(valeur, style: const TextStyle(fontSize: 13, color: Colors.black45), textAlign: TextAlign.center),
           ],
         ),
       ),
