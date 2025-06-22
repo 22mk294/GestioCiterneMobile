@@ -103,7 +103,7 @@ class _EcranAccueilState extends State<EcranAccueil> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                '${(pourcentage * 100).toStringAsFixed(1)}%',
+                '${(pourcentage * 100).toStringAsFixed(0)}%',
                 style: TextStyle(
                   fontSize: 30,
                   fontWeight: FontWeight.bold,
@@ -112,7 +112,7 @@ class _EcranAccueilState extends State<EcranAccueil> {
               ),
               const SizedBox(height: 4),
               Text(
-                '${niveau.toStringAsFixed(1)} L / ${capacite.toStringAsFixed(10)} L',
+                '${(niveau * 3).toStringAsFixed(1)} L / ${(capacite * 1000 * 2.3077).toStringAsFixed(1)} L',
                 style: const TextStyle(fontSize: 12, color: Colors.blue),
               ),
               const SizedBox(height: 4),
