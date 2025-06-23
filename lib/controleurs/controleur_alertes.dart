@@ -6,22 +6,23 @@ import 'package:flutter/material.dart';
 import '../modeles/modele_alerte.dart';
 import '../services/service_alertes_http.dart';
 
+// Enumération des catégories d'alertes
 enum CategorieAlerte { toutes, critiques, importantes, informations }
 
+// Contrôleur pour la gestion des alertes
 class ControleurAlertes with ChangeNotifier {
   final ServiceAlertesHttp _service = ServiceAlertesHttp();
 
-  List<Alerte> _alertes = [];
-  bool _chargement = false;
-  String? _erreur;
-  CategorieAlerte _categorie = CategorieAlerte.toutes;
+  List<Alerte> _alertes = []; // Liste des alertes
+  bool _chargement = false;   // Indique si le chargement est en cours
+  String? _erreur;            // Message d'erreur éventuel
+  CategorieAlerte _categorie = CategorieAlerte.toutes; // Catégorie sélectionnée
 
   // ---------------- GETTERS ----------------
   bool get chargement => _chargement;
   String? get erreur => _erreur;
   CategorieAlerte get categorie => _categorie;
 
-  /// Nombre total d'alertes non lues (calculé dynamiquement)
   /// Nombre total d'alertes non lues (calculé dynamiquement)
   int get nombreNonLues => _alertes.where((a) => !a.estLue).length;
 
@@ -72,6 +73,7 @@ class ControleurAlertes with ChangeNotifier {
     notifyListeners();
   }
 
+  // Change la catégorie d'alerte affichée
   void changerCategorie(CategorieAlerte cat) {
     _categorie = cat;
     notifyListeners();
@@ -85,7 +87,10 @@ class ControleurAlertes with ChangeNotifier {
   }
 
   // ------------- HELPERS PRIVÉS -------------
+  // Détermine si une alerte est critique selon son type
   bool _isCritique(String t)   => {'LOW_LEVEL', 'PUMP_FAILURE'}.contains(t);
+  // Détermine si une alerte est importante selon son type
   bool _isImportante(String t) => {'HIGH_FLOW', 'VALVE_STUCK', 'POWER_FAILURE'}.contains(t);
+  // Détermine si une alerte est une information selon son type
   bool _isInformation(String t)=> {'SYSTEM_UPDATE', 'SENSOR_ERROR'}.contains(t);
 }

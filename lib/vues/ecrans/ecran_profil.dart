@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../composants/barre_superieure.dart';
 
+// Écran affichant les informations du profil utilisateur
 class EcranProfil extends StatelessWidget {
   const EcranProfil({super.key});
 
@@ -30,15 +31,16 @@ class EcranProfil extends StatelessWidget {
               child: Icon(Icons.person, color: Colors.white, size: 40),
             ),
             const SizedBox(height: 20),
-            _infoLigne('Nom', utilisateur['nom']!),
-            _infoLigne('Email', utilisateur['email']!),
-            _infoLigne('Réservoir', 'ID #${utilisateur['tank_id']}'),
+            _infoLigne('Nom', utilisateur['nom']!), // Affiche le nom
+            _infoLigne('Email', utilisateur['email']!), // Affiche l'email
+            _infoLigne('Réservoir', 'ID #${utilisateur['tank_id']}'), // Affiche l'ID du réservoir
           ],
         ),
       ),
     );
   }
 
+  // Widget pour afficher une ligne d'information (titre + valeur)
   Widget _infoLigne(String titre, String valeur) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -56,3 +58,4 @@ class EcranProfil extends StatelessWidget {
     );
   }
 }
+

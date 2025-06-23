@@ -16,6 +16,13 @@ class ControleurAccueil with ChangeNotifier {
   bool get chargement => _chargement;
   String? get erreur => _erreur;
 
+  // Ajout des états de chargement locaux pour la pompe et la vanne
+  bool? _chargementPompe = false;
+  bool? _chargementVanne = false;
+
+  bool? get chargementPompe => _chargementPompe;
+  bool? get chargementVanne => _chargementVanne;
+
   Timer? _timer;
 
   /// Charge les données depuis l'API une fois
@@ -35,13 +42,11 @@ class ControleurAccueil with ChangeNotifier {
     notifyListeners();
   }
 
-  /// Active le rafraîchissement périodique toutes les 10 secondes
-
-
-  /// Arrête le rafraîchissement automatique
-
   /// Active ou désactive la pompe
   Future<void> reglerPompe(BuildContext context, bool activer) async {
+    _chargementPompe = true;
+    notifyListeners();
+
     final pompe = activer ? "1" : "0";
     final vanne = _donnees?.vanne.toUpperCase() == "OPEN" ? "1" : "0";
     final buzzer = _donnees?.buzzer.toUpperCase() == "ON" ? "1" : "0";
@@ -59,11 +64,16 @@ class ControleurAccueil with ChangeNotifier {
     }
 
     await chargerDonnees(context);
-  }
 
+    _chargementPompe = false;
+    notifyListeners();
+  }
 
   /// Ouvre ou ferme la vanne
   Future<void> reglerVanne(BuildContext context, bool ouvrir) async {
+    _chargementVanne = true;
+    notifyListeners();
+
     final pompe = _donnees?.pompe.toUpperCase() == "ON" ? "1" : "0";
     final vanne = ouvrir ? "1" : "0";
     final buzzer = _donnees?.buzzer.toUpperCase() == "ON" ? "1" : "0";
@@ -81,8 +91,8 @@ class ControleurAccueil with ChangeNotifier {
     }
 
     await chargerDonnees(context);
+
+    _chargementVanne = false;
+    notifyListeners();
   }
-
-
-
 }

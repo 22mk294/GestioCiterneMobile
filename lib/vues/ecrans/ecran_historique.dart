@@ -37,7 +37,7 @@ class _EcranHistoriqueState extends State<EcranHistorique> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final ctl = Provider.of<ControleurHistorique>(context, listen: false);
       ctl.chargerHistorique(jours: 7);
-      _rafraichisseur.demarrer(context, intervalle: 10);
+      _rafraichisseur.demarrer(context, intervalle: 5);
     });
   }
 
@@ -171,6 +171,8 @@ class _Graphique extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(10),
+        //meet moi un commentaire de fonction suivante
+        //
         boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 10)],
       ),
       child: BarChart(
@@ -183,12 +185,19 @@ class _Graphique extends StatelessWidget {
                 getTitlesWidget: (v, _) {
                   if (v.toInt() >= consommations.length) return const SizedBox.shrink();
                   final d = consommations[v.toInt()].date;
-                  return Text('${d.day}/${d.month}', style: const TextStyle(fontSize: 9));
+                  return Text('${d.day}/${d.month}', style: const TextStyle(fontSize: 9, color: Colors.black));
                 },
               ),
             ),
             leftTitles: AxisTitles(
-              sideTitles: SideTitles(showTitles: true, reservedSize: 28),
+              sideTitles: SideTitles(
+                showTitles: true,
+                reservedSize: 18, // Réduit la taille de la colonne à gauche
+                getTitlesWidget: (v, _) => Text(
+                  '${v.toInt()}',
+                  style: const TextStyle(fontSize: 8), // Réduit la taille de la police
+                ),
+              ),
             ),
           ),
           gridData: FlGridData(show: false),
@@ -219,7 +228,7 @@ class _ListeDetaillee extends StatelessWidget {
         return Row(
           children: [
             Expanded(flex: 2, child: Text(d, style: const TextStyle(fontSize: 13))),
-            Expanded(flex: 2, child: Text('${e.consommation} L', style: const TextStyle(fontSize: 13))),
+            Expanded(flex: 2, child: Text('${e.consommation.toStringAsFixed(1)} L', style: const TextStyle(fontSize: 13))),
             Expanded(flex: 2, child: Text('${e.revenu.toStringAsFixed(0)} FC', style: const TextStyle(fontSize: 13))),
             Expanded(
               flex: 2,

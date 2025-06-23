@@ -3,6 +3,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import '../../gestion_routes.dart';
 import '../../services/service_session.dart';
 
+// Écran de démarrage qui vérifie la connexion et la session utilisateur
 class EcranDemarrage extends StatefulWidget {
   @override
   _EcranDemarrageState createState() => _EcranDemarrageState();
@@ -12,24 +13,27 @@ class _EcranDemarrageState extends State<EcranDemarrage> {
   @override
   void initState() {
     super.initState();
-    _verifierConnexionEtSession();
+    _verifierConnexionEtSession(); // Lance la vérification au démarrage
   }
 
+  // Vérifie la connexion internet et la session utilisateur
   Future<void> _verifierConnexionEtSession() async {
     final result = await Connectivity().checkConnectivity();
     final actif = result != ConnectivityResult.none;
 
-    await Future.delayed(const Duration(seconds: 2));
+    await Future.delayed(const Duration(seconds: 10)); // Attente simulée
 
     if (!mounted) return;
 
     if (!actif) {
+      // Redirige vers l'écran d'erreur si pas de connexion
       Navigator.pushReplacementNamed(context, GestionRoutes.erreurConnexion);
       return;
     }
 
     final estConnecte = await ServiceSession.estConnecte();
 
+    // Redirige selon l'état de la session
     Navigator.pushReplacementNamed(
       context,
       estConnecte ? GestionRoutes.accueil : GestionRoutes.connexion,
@@ -38,6 +42,7 @@ class _EcranDemarrageState extends State<EcranDemarrage> {
 
   @override
   Widget build(BuildContext context) {
+    // Affiche le logo et un texte de chargement
     return Scaffold(
       backgroundColor: const Color(0xFFCDE5FE),
       body: Center(
@@ -64,3 +69,4 @@ class _EcranDemarrageState extends State<EcranDemarrage> {
     );
   }
 }
+

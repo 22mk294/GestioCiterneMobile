@@ -1,14 +1,15 @@
+// Modèle de données représentant l'état de la citerne
 class DonneesCiterne {
-  final double niveauEau;       // %
-  final String pompe;
-  final String vanne;
-  final String buzzer;
-  final double capacite;        // m³ ou L selon votre API
-  final String alerte;
+  final double niveauEau;       // Niveau d'eau en pourcentage
+  final String pompe;           // État de la pompe ("ON"/"OFF")
+  final String vanne;           // État de la vanne ("OPEN"/"CLOSED")
+  final String buzzer;          // État du buzzer
+  final double capacite;        // Capacité de la citerne (m³ ou L selon l'API)
+  final String alerte;          // Message d'alerte
 
   // 🔸 NOUVEAU ↓
-  final double consommation;    // water_usage en L
-  final double revenu;          // revenue en FC
+  final double consommation;    // Consommation d'eau en L
+  final double revenu;          // Revenu généré en FC
 
   DonneesCiterne({
     required this.niveauEau,
@@ -21,8 +22,10 @@ class DonneesCiterne {
     required this.revenu,         // ← ajouté
   });
 
+  // Retourne le pourcentage d'eau (entre 0 et 1)
   double get pourcentageEau => (niveauEau / 100).clamp(0.0, 1.0);
 
+  // Crée une copie de l'objet avec des valeurs modifiées si besoin
   DonneesCiterne copyWith({
     double? niveauEau,
     String? pompe,
@@ -45,6 +48,7 @@ class DonneesCiterne {
     );
   }
 
+  // Crée une instance à partir d'un JSON
   factory DonneesCiterne.fromJson(Map<String, dynamic> json) {
     return DonneesCiterne(
       niveauEau:    double.tryParse(json['water_level'].toString()) ?? 0.0,
@@ -58,3 +62,4 @@ class DonneesCiterne {
     );
   }
 }
+
