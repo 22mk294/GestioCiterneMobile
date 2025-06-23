@@ -3,12 +3,16 @@ import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
 import '../modeles/modele_donnees.dart';
 
+//dedie a la communication avec l'ESP32 via HTTP qvec le
+//backend
+
 class ServiceESP32Http {
   final String _baseUrl = "http://smartwatersystem.atwebpages.com/api";
   final String _tankId = "1";
   final String _apiKey = "1ac34bd67sw";
 
   Future<DonneesCiterne> getInfosCiterne() async {
+    // Construction de l'URL pour récupérer les données de la citerne
     final uri = Uri.parse("$_baseUrl/get_data.php?tank_id=$_tankId&api_key=$_apiKey");
 
     final response = await http.get(uri);
@@ -27,9 +31,10 @@ class ServiceESP32Http {
     }
   }
 
+  /// Envoie une commande à l'ESP32
   Future<void> envoyerCommande(String action, String valeur) async {
     final uri = Uri.parse("$_baseUrl/send_command.php");
-
+// Construction de l'URL pour envoyer une commande
     final response = await http.post(uri, body: {
       'tank_id': _tankId,
       'api_key': _apiKey,
@@ -37,15 +42,17 @@ class ServiceESP32Http {
       'value': valeur,
     });
 
+    // Vérification du code de statut de la réponse
     if (response.statusCode != 200) {
       throw Exception("Échec de la commande : $action -> $valeur (${response.statusCode})");
     }
   }
 
+  /// Envoie une commande de contrôle pour la pompe et la vanne
   Future<bool> envoyerCommandeControle({
     required String pumpState,
     required String valveState,
-    required String buzzerState,
+
   }) async {
     final uri = Uri.parse("$_baseUrl/save_control.php");
 
@@ -54,7 +61,6 @@ class ServiceESP32Http {
       "api_key": _apiKey,
       "pump_state": pumpState,
       "valve_state": valveState,
-      "buzzer_state": buzzerState,
     });
 
     try {

@@ -19,6 +19,11 @@ class Alerte {
     this.estLue = false,
   });
 
+  /*
+  factory pour créer une instance de Alerte à partir d'un JSON
+  convertit les types de données si nécessaire
+  en particulier pour les entiers et les dates
+   */
   factory Alerte.fromJson(Map<String, dynamic> json) => Alerte(
     id: int.parse(json['id'].toString()),
     tankId: int.parse(json['tank_id'].toString()),
@@ -27,6 +32,7 @@ class Alerte {
     timestamp: DateTime.parse(json['timestamp']),
   );
 
+  //duplique l'instance actuelle avec des modifications
   Alerte copyWith({bool? estLue}) => Alerte(
     id: id,
     tankId: tankId,

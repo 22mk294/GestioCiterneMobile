@@ -7,6 +7,7 @@ import '../modeles/modele_alerte.dart';
 import '../services/service_alertes_http.dart';
 
 // Enumération des catégories d'alertes
+//permet de selectionner dynamique une catégorie d'alerte
 enum CategorieAlerte { toutes, critiques, importantes, informations }
 
 // Contrôleur pour la gestion des alertes

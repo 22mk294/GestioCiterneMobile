@@ -87,7 +87,7 @@ class _EcranAccueilState extends State<EcranAccueil> {
                   alignment: Alignment.center,
                   child: Text(
                     "Contrôle de la citerne",
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.blueGrey),
+                    style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold, color: Colors.blueGrey),
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -95,6 +95,7 @@ class _EcranAccueilState extends State<EcranAccueil> {
                 _buildCartesCommandes(
                   donnees!,
                   controleur,
+                  //est-ce que qu'on change la pompe ou la vanne ?
                   controleur.chargementPompe ?? false,
                   controleur.chargementVanne ?? false,
                 ), // Affiche les cartes de commandes/statistiques
@@ -158,12 +159,12 @@ class _EcranAccueilState extends State<EcranAccueil> {
     final revenuAffiche = "${donnees.revenu.toStringAsFixed(2)} Fc";
 
     return GridView.count(
-      crossAxisCount: 2,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
+      crossAxisCount: 2, //2 element de la grille
+      shrinkWrap: true, // Permet de ne pas prendre tout l'espace disponible
+      physics: const NeverScrollableScrollPhysics(), //pour eviter le defilement
       mainAxisSpacing: 12,
       crossAxisSpacing: 12,
-      childAspectRatio: 1.2,
+      childAspectRatio: 1.1,
       children: [
         // Carte pour commander la pompe avec loader local
         _carteCommande(
@@ -177,8 +178,8 @@ class _EcranAccueilState extends State<EcranAccueil> {
         _carteCommande(
           titre: "Robinet",
           icone: Icons.water_drop,
-          actif: donnees.vanne.toUpperCase() == "OPEN",
-          onChanged: (val) => controleur.reglerVanne(context, val),
+          actif: donnees.vanne.toUpperCase() == "OPEN", //verifie si vanne est ouverte
+          onChanged: (val) => controleur.reglerVanne(context, val), //commande la vanne
           chargement: chargementVanne,
         ),
         // Carte affichant la consommation
@@ -206,8 +207,8 @@ class _EcranAccueilState extends State<EcranAccueil> {
     bool chargement = false,
   }) {
     return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      elevation: 5,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
         child: Column(
@@ -220,11 +221,7 @@ class _EcranAccueilState extends State<EcranAccueil> {
             Text(titre, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
             const SizedBox(height: 4),
             // Affiche un loader local si la commande est en cours, sinon le switch
-            chargement
-                ? const SizedBox(
-                    height: 24,
-                    width: 24,
-                    child: CircularProgressIndicator(strokeWidth: 2),
+            chargement ? const SizedBox(height: 24, width: 24, child: CircularProgressIndicator(strokeWidth: 2),
                   )
                 : Switch(
                     value: actif,
@@ -245,8 +242,8 @@ class _EcranAccueilState extends State<EcranAccueil> {
     required String valeur,
   }) {
     return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      elevation: 5,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
         child: Column(

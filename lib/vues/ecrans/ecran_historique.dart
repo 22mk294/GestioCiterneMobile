@@ -88,8 +88,10 @@ class _CorpsHistorique extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final largeur = MediaQuery.of(context).size.width;
+    final hauteur = MediaQuery.of(context).size.height;
     return Padding(
-      padding: const EdgeInsets.all(12),
+      padding: EdgeInsets.all(largeur * 0.03), // padding responsive
       child: Consumer<ControleurHistorique>(
         builder: (context, ctl, _) {
           if (ctl.chargement) {
@@ -100,19 +102,19 @@ class _CorpsHistorique extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               SingleChildScrollView(scrollDirection: Axis.horizontal, child: _Filtres(ctl: ctl)),
-              const SizedBox(height: 12),
+              SizedBox(height: hauteur * 0.015),
               if (ctl.historique.isEmpty)
                 const Expanded(
                   child: Center(child: Text('Aucune donnée disponible.')),
                 )
               else ...[
-                _Graphique(consommations: ctl.historique),
-                const SizedBox(height: 18),
+                _Graphique(consommations: ctl.historique, largeur: largeur),
+                SizedBox(height: hauteur * 0.025),
                 const Text('Détails par jour', style: TextStyle(fontWeight: FontWeight.bold)),
-                const SizedBox(height: 4),
-                Expanded(child: _ListeDetaillee(ctl: ctl)),
-                const SizedBox(height: 8),
-                _CartesStats(ctl: ctl),
+                SizedBox(height: hauteur * 0.005),
+                Expanded(child: _ListeDetaillee(ctl: ctl, largeur: largeur)),
+                SizedBox(height: hauteur * 0.01),
+                _CartesStats(ctl: ctl, largeur: largeur),
               ],
             ],
           );
@@ -152,7 +154,8 @@ class _Filtres extends StatelessWidget {
 
 class _Graphique extends StatelessWidget {
   final List<EntreeHistorique> consommations;
-  const _Graphique({required this.consommations});
+  final double largeur;
+  const _Graphique({required this.consommations, required this.largeur});
 
   @override
   Widget build(BuildContext context) {
@@ -160,19 +163,21 @@ class _Graphique extends StatelessWidget {
     for (int i = 0; i < consommations.length; i++) {
       bars.add(
         BarChartGroupData(x: i, barRods: [
-          BarChartRodData(toY: consommations[i].consommation.toDouble(), width: 12, color: Colors.blue)
+          BarChartRodData(
+            toY: consommations[i].consommation.toDouble(),
+            width: largeur * 0.025, // largeur de barre responsive
+            color: Colors.blue,
+          )
         ]),
       );
     }
 
     return Container(
-      height: 200,
-      padding: const EdgeInsets.all(10),
+      height: largeur < 400 ? 160 : 200, // hauteur responsive
+      padding: EdgeInsets.all(largeur * 0.025),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(10),
-        //meet moi un commentaire de fonction suivante
-        //
+        borderRadius: BorderRadius.circular(largeur * 0.025),
         boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 10)],
       ),
       child: BarChart(
@@ -185,17 +190,23 @@ class _Graphique extends StatelessWidget {
                 getTitlesWidget: (v, _) {
                   if (v.toInt() >= consommations.length) return const SizedBox.shrink();
                   final d = consommations[v.toInt()].date;
-                  return Text('${d.day}/${d.month}', style: const TextStyle(fontSize: 9, color: Colors.black));
+                  return Text(
+                    '${d.day}/${d.month}',
+                    style: TextStyle(
+                      fontSize: largeur < 400 ? 8 : 10,
+                      color: Colors.black,
+                    ),
+                  );
                 },
               ),
             ),
             leftTitles: AxisTitles(
               sideTitles: SideTitles(
                 showTitles: true,
-                reservedSize: 18, // Réduit la taille de la colonne à gauche
+                reservedSize: largeur < 400 ? 14 : 18,
                 getTitlesWidget: (v, _) => Text(
                   '${v.toInt()}',
-                  style: const TextStyle(fontSize: 8), // Réduit la taille de la police
+                  style: TextStyle(fontSize: largeur < 400 ? 7 : 9),
                 ),
               ),
             ),
@@ -210,7 +221,8 @@ class _Graphique extends StatelessWidget {
 
 class _ListeDetaillee extends StatelessWidget {
   final ControleurHistorique ctl;
-  const _ListeDetaillee({required this.ctl});
+  final double largeur;
+  const _ListeDetaillee({required this.ctl, required this.largeur});
 
   @override
   Widget build(BuildContext context) {
@@ -227,15 +239,15 @@ class _ListeDetaillee extends StatelessWidget {
             : ' (${varPct >= 0 ? '+' : ''}${varPct.toStringAsFixed(1)}%)';
         return Row(
           children: [
-            Expanded(flex: 2, child: Text(d, style: const TextStyle(fontSize: 13))),
-            Expanded(flex: 2, child: Text('${e.consommation.toStringAsFixed(1)} L', style: const TextStyle(fontSize: 13))),
-            Expanded(flex: 2, child: Text('${e.revenu.toStringAsFixed(0)} FC', style: const TextStyle(fontSize: 13))),
+            Expanded(flex: 2, child: Text(d, style: TextStyle(fontSize: largeur < 400 ? 11 : 13))),
+            Expanded(flex: 2, child: Text('${e.consommation.toStringAsFixed(1)} L', style: TextStyle(fontSize: largeur < 400 ? 11 : 13))),
+            Expanded(flex: 2, child: Text('${e.revenu.toStringAsFixed(0)} FC', style: TextStyle(fontSize: largeur < 400 ? 11 : 13))),
             Expanded(
               flex: 2,
               child: Text(
                 varText,
                 style: TextStyle(
-                  fontSize: 12,
+                  fontSize: largeur < 400 ? 10 : 12,
                   color: varPct.isNaN ? Colors.grey : (varPct >= 0 ? Colors.green : Colors.red),
                 ),
               ),
@@ -249,23 +261,24 @@ class _ListeDetaillee extends StatelessWidget {
 
 class _CartesStats extends StatelessWidget {
   final ControleurHistorique ctl;
-  const _CartesStats({required this.ctl});
+  final double largeur;
+  const _CartesStats({required this.ctl, required this.largeur});
 
   Widget _card(String titre, String val) {
     return Expanded(
       child: Container(
-        padding: const EdgeInsets.all(8),
-        margin: const EdgeInsets.symmetric(horizontal: 4),
+        padding: EdgeInsets.all(largeur * 0.02),
+        margin: EdgeInsets.symmetric(horizontal: largeur * 0.01),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(largeur * 0.02),
           border: Border.all(color: Colors.blueAccent),
         ),
         child: Column(
           children: [
-            Text(val, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 2),
-            Text(titre, textAlign: TextAlign.center, style: const TextStyle(fontSize: 10)),
+            Text(val, style: TextStyle(fontSize: largeur < 400 ? 13 : 15, fontWeight: FontWeight.bold)),
+            SizedBox(height: largeur * 0.005),
+            Text(titre, textAlign: TextAlign.center, style: TextStyle(fontSize: largeur < 400 ? 9 : 10)),
           ],
         ),
       ),
@@ -283,3 +296,4 @@ class _CartesStats extends StatelessWidget {
     );
   }
 }
+

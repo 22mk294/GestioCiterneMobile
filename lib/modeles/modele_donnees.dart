@@ -1,15 +1,13 @@
 // Modèle de données représentant l'état de la citerne
 class DonneesCiterne {
-  final double niveauEau;       // Niveau d'eau en pourcentage
-  final String pompe;           // État de la pompe ("ON"/"OFF")
-  final String vanne;           // État de la vanne ("OPEN"/"CLOSED")
-  final String buzzer;          // État du buzzer
-  final double capacite;        // Capacité de la citerne (m³ ou L selon l'API)
-  final String alerte;          // Message d'alerte
-
-  // 🔸 NOUVEAU ↓
-  final double consommation;    // Consommation d'eau en L
-  final double revenu;          // Revenu généré en FC
+  final double niveauEau;
+  final String pompe;
+  final String vanne;
+  final String buzzer;
+  final double capacite;
+  final String alerte;
+  final double consommation;
+  final double revenu;
 
   DonneesCiterne({
     required this.niveauEau,
@@ -18,14 +16,18 @@ class DonneesCiterne {
     required this.buzzer,
     required this.capacite,
     required this.alerte,
-    required this.consommation,   // ← ajouté
-    required this.revenu,         // ← ajouté
+    required this.consommation,
+    required this.revenu,
   });
 
   // Retourne le pourcentage d'eau (entre 0 et 1)
   double get pourcentageEau => (niveauEau / 100).clamp(0.0, 1.0);
 
-  // Crée une copie de l'objet avec des valeurs modifiées si besoin
+  /*
+    * Crée une copie de l'instance avec des valeurs modifiées.
+    * Utilisé pour mettre à jour les données sans modifier l'instance originale.
+    * util pour la programmation immuable.
+   */
   DonneesCiterne copyWith({
     double? niveauEau,
     String? pompe,
@@ -33,8 +35,8 @@ class DonneesCiterne {
     String? buzzer,
     double? capacite,
     String? alerte,
-    double? consommation,   // ← ajouté
-    double? revenu,         // ← ajouté
+    double? consommation,
+    double? revenu,
   }) {
     return DonneesCiterne(
       niveauEau:     niveauEau     ?? this.niveauEau,

@@ -26,8 +26,10 @@ class _EcranParametresState extends State<EcranParametres> {
   bool _init = false;
 
   @override
+  // Initialisation de l'état
   void initState() {
     super.initState();
+    // Charge les paramètres dès que l'écran est construit
     Provider.of<ControleurParametres>(context, listen: false)
         .chargerParametres();
   }
@@ -43,12 +45,13 @@ class _EcranParametresState extends State<EcranParametres> {
               body: Center(child: CircularProgressIndicator()));
         }
 
+        // Initialisation des champs si ce n'est pas déjà fait
         if (!_init) {
           _pumpMode = param.pumpMode;
           _criticalLevel = param.criticalLevel;
           _refreshRate = param.refreshRate;
           _pricePer20L = param.pricePer20L;
-          _init = true;
+          _init = true; // Évite la réinitialisation à chaque build
         }
 
         return Scaffold(
